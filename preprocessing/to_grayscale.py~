@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+from PIL import Image
+from pylab import *
+import os
+import sys
+
+def ConvertToGray(in_dir,out_dir):
+	#读取图片,灰度化，并转为数组
+	im = array(Image.open("./source/test.jpg").convert('L'),'f')
+	
+
