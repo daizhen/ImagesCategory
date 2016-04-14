@@ -14,4 +14,5 @@ def ConvertToGray(in_dir,out_dir):
         im.save(out_file);
 
 
-ConvertToGray("../sample_data/original_images","../sample_data/gray_images")
+#ConvertToGray("../sample_data/original_images","../sample_data/gray_images")
+ConvertToGray("../data/jpg_images","../data/gray_images")

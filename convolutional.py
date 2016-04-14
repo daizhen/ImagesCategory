@@ -138,11 +138,13 @@ def main(argv=None):  # pylint: disable=unused-argument
                             stddev=0.1,
                             seed=SEED))
     conv1_biases = tf.Variable(tf.zeros([32]))
+	
     conv2_weights = tf.Variable(
         tf.truncated_normal([5, 5, 32, 64],
                             stddev=0.1,
                             seed=SEED))
     conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]))
+	
     fc1_weights = tf.Variable(  # fully connected, depth 512.
         tf.truncated_normal([IMAGE_SIZE / 4 * IMAGE_SIZE / 4 * 64, 512],
                             stddev=0.1,
