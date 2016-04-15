@@ -10,9 +10,10 @@ def convert_to_jpg(in_dir,out_dir):
 		if not os.path.exists(out_full_name):
 			if current_file.lower().endswith('.png'):
 				try:
-					Image.open(os.path.join(in_dir,current_file)).save(os.path.join(out_dir,outfile))
+					Image.open(in_full_name).save(out_full_name)
 				except IOError:
 					print "This format can not support!", current_file
+					open(out_full_name, "wb").write(open(in_full_name, "rb").read())
 			elif current_file.lower().endswith('.jpg'):
 				#Copy file
 				open(out_full_name, "wb").write(open(in_full_name, "rb").read())
