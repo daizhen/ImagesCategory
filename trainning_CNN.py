@@ -10,6 +10,13 @@ import random
 import math
 import tensorflow as tf
 
+NUM_CHANNELS = 1
+PIXEL_DEPTH = 255
+NUM_LABELS = 3
+SEED = 66478  # Set to None for random seed.
+BATCH_SIZE = 1
+NUM_EPOCHS = 10
+
 def test():
     #os.path.join()
 	pass
@@ -35,7 +42,7 @@ def LoadCategoryData(imageDir):
 	#label_list=data_list[,1]
     
     '''shuffle the list '''
-    shuffle(data_list)
+    random.shuffle(data_list)
     print len(data_list)
     
     for dataItem in data_list:
@@ -74,14 +81,12 @@ def main(argv=None):
     test_labels = all_labels[train_size+validation_size+1:]
     
     num_epochs = 10
-    NUM_CHANNELS = 1
-    NUM_LABELS = 3
     
     # This is where training samples and labels are fed to the graph.
     # These placeholder nodes will be fed a batch of training data at each
     # training step using the {feed_dict} argument to the Run() call below.
     train_data_node = tf.placeholder(tf.float32,shape=(None, None, NUM_CHANNELS))
-    train_labels_node = tf.placeholder(tf.float32,shape=(NUM_LABELS))
+    train_labels_node = tf.placeholder(tf.string,shape=[NUM_LABELS])
     
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
@@ -97,6 +102,7 @@ def main(argv=None):
                             seed=SEED))
     conv1_biases = tf.Variable(tf.zeros([32]))
 	
+    '''
     conv2_weights = tf.Variable(
         tf.truncated_normal([5, 5, 32, 64],
                             stddev=0.1,
@@ -113,7 +119,7 @@ def main(argv=None):
                             stddev=0.1,
                             seed=SEED))
     fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]))
-
+    '''
     # We will replicate the model structure for the training subgraph, as well
     # as the evaluation subgraphs, while sharing the trainable parameters.
     def model(data, train=False):
