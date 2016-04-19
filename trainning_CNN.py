@@ -45,12 +45,13 @@ def LoadCategoryData(imageDir):
     random.shuffle(data_list)
     print len(data_list)
     
-    for dataItem in data_list:
+    for index in range(20):
+        dataItem = data_list[index]
         image = Image.open(os.path.join(imageDir,dataItem[0]))   # image is a PIL image 
         array = numpy.array(image)        # array is a numpy array
         image_list.append(array);
         label_list.append(dataItem[1]);
-    return image_list[:10],label_list[:10]
+    return image_list,label_list
 
 '''
 x,y = LoadCategoryData('sample_data/gray_images')
@@ -85,7 +86,7 @@ def main(argv=None):
     # This is where training samples and labels are fed to the graph.
     # These placeholder nodes will be fed a batch of training data at each
     # training step using the {feed_dict} argument to the Run() call below.
-    train_data_node = tf.placeholder(tf.float32,shape=(None, None, NUM_CHANNELS))
+    train_data_node = tf.placeholder(tf.float32,shape=(1, None, None, NUM_CHANNELS))
     train_labels_node = tf.placeholder(tf.string,shape=[NUM_LABELS])
     
     # For the validation and test data, we'll just hold the entire dataset in
@@ -102,7 +103,7 @@ def main(argv=None):
                             seed=SEED))
     conv1_biases = tf.Variable(tf.zeros([32]))
 	
-    '''
+
     conv2_weights = tf.Variable(
         tf.truncated_normal([5, 5, 32, 64],
                             stddev=0.1,
@@ -119,7 +120,7 @@ def main(argv=None):
                             stddev=0.1,
                             seed=SEED))
     fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]))
-    '''
+
     # We will replicate the model structure for the training subgraph, as well
     # as the evaluation subgraphs, while sharing the trainable parameters.
     def model(data, train=False):
@@ -129,25 +130,28 @@ def main(argv=None):
         # shape matches the data layout: [image index, y, x, depth].
         conv = tf.nn.conv2d(data,
                             conv1_weights,
-                            strides=[1, 1, 1, 1],
+                            strides=[1,1, 1, 1],
                             padding='SAME')
         # Bias and rectified linear non-linearity.
         relu = tf.nn.relu(tf.nn.bias_add(conv, conv1_biases))
         # Max pooling. The kernel size spec {ksize} also follows the layout of
         # the data. Here we have a pooling window of 2, and a stride of 2.
+        
         pool = tf.nn.max_pool(relu,
-                              ksize=[1, 2, 2, 1],
-                              strides=[1, 2, 2, 1],
-                              padding='SAME')
+                              ksize=[1,2, 2, 1],
+                              strides=[1,2, 2, 1],
+                              padding='SAME')                    
         conv = tf.nn.conv2d(pool,
                             conv2_weights,
-                            strides=[1, 1, 1, 1],
+                            strides=[1,1, 1, 1],
                             padding='SAME')
         relu = tf.nn.relu(tf.nn.bias_add(conv, conv2_biases))
+        
+        #Todo: pyramid pooling to make the pool to the same size
         pool = tf.nn.max_pool(relu,
                               ksize=[1, 2, 2, 1],
                               strides=[1, 2, 2, 1],
-                              padding='SAME')
+                              padding='VALID')
         # Reshape the feature map cuboid into a 2D matrix to feed it to the
         # fully connected layers.
         pool_shape = pool.get_shape().as_list()
@@ -165,7 +169,8 @@ def main(argv=None):
 
     # Training computation: logits + cross-entropy loss.
     logits = model(train_data_node, True)
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+    loss = tf.reduce_mean(
+        tf.nn.softmax_cross_entropy_with_logits(
         logits, train_labels_node))
 
     # L2 regularization for the fully connected parameters.
