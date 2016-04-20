@@ -17,11 +17,19 @@ x = [[1,2,3,4],[1,2,3,4]]
 print x
 print x1
 
-d = tf.constant(x1, shape=tf.TensorShape([]), dtype=tf.float32)
+
+
+
+
+
+
+
+v = tf.Variable(x)
 init = tf.initialize_all_variables()
 sess.run(init)
 c = sess.run(a+b)
-
+v2 = sess.run(v)
+print v2
 print c
 a = a+1
 b = b+1

@@ -82,7 +82,6 @@ def main(argv=None):
     test_data = all_data[train_size+validation_size:]
     test_labels = all_labels[train_size+validation_size:]
     
-    print test_data
     
     num_epochs = 10
     
@@ -90,14 +89,14 @@ def main(argv=None):
     # These placeholder nodes will be fed a batch of training data at each
     # training step using the {feed_dict} argument to the Run() call below.
     train_data_node = tf.placeholder(tf.float32,shape=(1, None, None, NUM_CHANNELS))
-    train_labels_node = tf.placeholder(tf.string,shape=[NUM_LABELS])
+    train_labels_node = tf.placeholder(tf.string,shape=[1,NUM_LABELS])
     
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
     
     
-    validation_data_node = tf.constant(validation_data, shape=[validation_size,None])
-    test_data_node = tf.constant(test_data,shape=[test_size,None])
+    validation_data_node = tf.placeholder(tf.float32,shape=[validation_size, None])
+    test_data_node = tf.placeholder(tf.float32,shape=[test_size, None])
 
     # The variables below hold all the trainable weights. They are passed an
     # initial value which will be assigned when when we call:
@@ -114,6 +113,7 @@ def main(argv=None):
                             seed=SEED))
     conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]))
 	
+    '''
     fc1_weights = tf.Variable(  # fully connected, depth 512.
         tf.truncated_normal([IMAGE_SIZE / 4 * IMAGE_SIZE / 4 * 64, 512],
                             stddev=0.1,
@@ -124,7 +124,8 @@ def main(argv=None):
                             stddev=0.1,
                             seed=SEED))
     fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]))
-
+    '''
+    
     # We will replicate the model structure for the training subgraph, as well
     # as the evaluation subgraphs, while sharing the trainable parameters.
     def model(data, train=False):
