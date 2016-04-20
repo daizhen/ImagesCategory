@@ -1,0 +1,6 @@
+../data/jpg_images/sd21736946claims.jpeg
+
+/usr/lib/python2.7/dist-packages/PIL/Image.py:882: UserWarning: Palette images with Transparency   expressed in bytes should be converted to RGBA images
+  'to RGBA images')
+../data/jpg_images/sd22244362679333-001.jpeg
+
