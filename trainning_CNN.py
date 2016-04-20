@@ -91,8 +91,10 @@ def main(argv=None):
     
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
-    validation_data_node = tf.constant(validation_data)
-    test_data_node = tf.constant(test_data)
+    
+    
+    #validation_data_node = tf.constant(validation_data, shape=(1, None, None, NUM_CHANNELS))
+    #test_data_node = tf.constant(test_data)
 
     # The variables below hold all the trainable weights. They are passed an
     # initial value which will be assigned when when we call:
@@ -102,7 +104,6 @@ def main(argv=None):
                             stddev=0.1,
                             seed=SEED))
     conv1_biases = tf.Variable(tf.zeros([32]))
-	
 
     conv2_weights = tf.Variable(
         tf.truncated_normal([5, 5, 32, 64],
