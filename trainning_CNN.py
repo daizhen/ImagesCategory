@@ -45,8 +45,11 @@ def LoadCategoryData(imageDir):
     random.shuffle(data_list)
     print len(data_list)
     
-    for index in range(20):
+    for index in range(10):
         dataItem = data_list[index]
+        
+        print os.path.join(imageDir,dataItem[0])
+
         image = Image.open(os.path.join(imageDir,dataItem[0]))   # image is a PIL image 
         array = numpy.array(image)        # array is a numpy array
         image_list.append(array);
@@ -93,8 +96,8 @@ def main(argv=None):
     # one constant node.
     
     
-    #validation_data_node = tf.constant(validation_data, shape=(1, None, None, NUM_CHANNELS))
-    #test_data_node = tf.constant(test_data)
+    validation_data_node = tf.constant(validation_data, shape=[validation_size,None])
+    test_data_node = tf.constant(test_data,shape=[test_size,None])
 
     # The variables below hold all the trainable weights. They are passed an
     # initial value which will be assigned when when we call:
