@@ -45,10 +45,8 @@ def LoadCategoryData(imageDir):
     random.shuffle(data_list)
     print len(data_list)
     
-    for index in range(10):
+    for index in range(20):
         dataItem = data_list[index]
-        
-        print os.path.join(imageDir,dataItem[0])
 
         image = Image.open(os.path.join(imageDir,dataItem[0]))   # image is a PIL image 
         array = numpy.array(image)        # array is a numpy array
@@ -75,14 +73,16 @@ def main(argv=None):
     validation_size = int(validation_prop * len(all_data)/100)
     test_size = int(test_prop * len(all_data)/100)
     
-    train_data = all_data[:train_size]
-    train_labels = all_labels[:train_size]
+    train_data = all_data[:train_size - 1]
+    train_labels = all_labels[:train_size - 1]
     
-    validation_data = all_data[train_size+1:train_size+validation_size]
-    validation_labels = all_labels[train_size+1:train_size+validation_size]
+    validation_data = all_data[train_size:train_size+validation_size -1]
+    validation_labels = all_labels[train_size:train_size+validation_size - 1]
     
-    test_data = all_data[train_size+validation_size+1:]
-    test_labels = all_labels[train_size+validation_size+1:]
+    test_data = all_data[train_size+validation_size:]
+    test_labels = all_labels[train_size+validation_size:]
+    
+    print test_data
     
     num_epochs = 10
     
