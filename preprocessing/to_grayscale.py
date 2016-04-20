@@ -10,9 +10,12 @@ def ConvertToGray(in_dir,out_dir):
     for file in file_list:
         in_file = os.path.join(in_dir,file)
         out_file = os.path.join(out_dir,file);
-        im = Image.open(in_file).convert('L')
-        im.save(out_file);
-
+        if not os.path.exists(out_file):
+            try:
+                im = Image.open(in_file).convert('L')
+                im.save(out_file);
+            except IOError:
+                print in_file
 
 #ConvertToGray("../sample_data/original_images","../sample_data/gray_images")
 ConvertToGray("../data/jpg_images","../data/gray_images")
