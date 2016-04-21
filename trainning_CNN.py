@@ -68,6 +68,9 @@ print x[0].shape
 def Train():
 	pass
 
+def create_labels(original_labels,possible_labels):
+     return (original_labels == possible_labels[:, None]).astype(numpy.float32)
+     
 def main(argv=None):
 
     train_prop = 70
@@ -102,7 +105,7 @@ def main(argv=None):
     # These placeholder nodes will be fed a batch of training data at each
     # training step using the {feed_dict} argument to the Run() call below.
     train_data_node = tf.placeholder(tf.float32,shape=(1,None, None, NUM_CHANNELS))
-    train_labels_node = tf.placeholder(tf.string,shape=[NUM_LABELS])
+    train_labels_node = tf.placeholder(tf.float32,shape=[NUM_LABELS])
     
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.

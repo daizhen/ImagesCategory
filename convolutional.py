@@ -65,6 +65,8 @@ def extract_labels(filename, num_images):
         buf = bytestream.read(1 * num_images)
         labels = numpy.frombuffer(buf, dtype=numpy.uint8)
     # Convert to dense 1-hot representation.
+    
+    print 'labels:',numpy.arange(NUM_LABELS) == labels[0, None]
     return (numpy.arange(NUM_LABELS) == labels[:, None]).astype(numpy.float32)
 
 
@@ -105,16 +107,17 @@ def main(argv=None):  # pylint: disable=unused-argument
 
         # Extract it into numpy arrays.
         train_data = extract_data(train_data_filename, 60000)
-        print train_data.shape
+
         train_labels = extract_labels(train_labels_filename, 60000)
         test_data = extract_data(test_data_filename, 10000)
         test_labels = extract_labels(test_labels_filename, 10000)
-
+        
         # Generate a validation set.
         validation_data = train_data[:VALIDATION_SIZE, :, :, :]
         validation_labels = train_labels[:VALIDATION_SIZE]
         train_data = train_data[VALIDATION_SIZE:, :, :, :]
         train_labels = train_labels[VALIDATION_SIZE:]
+        print "train_labels",train_labels.shape
         num_epochs = NUM_EPOCHS
     train_size = train_labels.shape[0]
 
