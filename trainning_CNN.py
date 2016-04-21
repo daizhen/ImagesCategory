@@ -105,7 +105,7 @@ def main(argv=None):
     # These placeholder nodes will be fed a batch of training data at each
     # training step using the {feed_dict} argument to the Run() call below.
     train_data_node = tf.placeholder(tf.float32,shape=(1,None, None, NUM_CHANNELS))
-    train_labels_node = tf.placeholder(tf.float32,shape=[NUM_LABELS])
+    train_labels_node = tf.placeholder(tf.float32,shape=[1,NUM_LABELS])
     
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
@@ -270,7 +270,7 @@ def main(argv=None):
             offset = step % train_size
             
             datashape = train_data[offset].shape
-            batch_data =np.reshape(train_data[offset],(1,datashape[0],datashape[1],1))
+            batch_data =numpy.reshape(train_data[offset],(1,datashape[0],datashape[1],1))
             batch_labels = train_labels[offset]
             
             # This dictionary maps the batch data (as a numpy array) to the
