@@ -17,6 +17,7 @@ SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 1
 NUM_EPOCHS = 10
 
+
 def test():
     #os.path.join()
 	pass
@@ -66,6 +67,9 @@ def main(argv=None):
     train_prop = 70
     validation_prop = 20
     test_prop = 10
+    pyramid_1= 1 # pooling the image into 1x1 
+    pyramid_2= 10 # pooling the image into 10x10
+    pyramid_3= 50 # pooling the image into 50x50
     
     # Get the data.
     all_data, all_labels = LoadCategoryData('sample_data/gray_images')
@@ -145,7 +149,7 @@ def main(argv=None):
         pool = tf.nn.max_pool(relu,
                               ksize=[1,2, 2, 1],
                               strides=[1,2, 2, 1],
-                              padding='SAME')                    
+                              padding='SAME')
         conv = tf.nn.conv2d(pool,
                             conv2_weights,
                             strides=[1,1, 1, 1],
@@ -153,10 +157,40 @@ def main(argv=None):
         relu = tf.nn.relu(tf.nn.bias_add(conv, conv2_biases))
         
         #Todo: pyramid pooling to make the pool to the same size
-        pool = tf.nn.max_pool(relu,
-                              ksize=[1, 2, 2, 1],
-                              strides=[1, 2, 2, 1],
+        
+        data_width = relu.get_shape().as_list()[1]
+        data_height = relu.get_shape().as_list()[2]
+        
+        
+        pool_window_width_1 = math.ceil(data_width/pyramid_1)
+        pool_window_height_1 = math.ceil(data_height/pyramid_1)
+        pool_stride_width_1 = math.floor(data_width/pyramid_1)
+        pool_stride_height_1 = math.floor(data_height/pyramid_1)
+        
+        pool_window_width_2 = math.ceil(data_width/pyramid_2)
+        pool_window_height_2 = math.ceil(data_height/pyramid_2)
+        pool_stride_width_2 = math.floor(data_width/pyramid_2)
+        pool_stride_height_2 = math.floor(data_height/pyramid_2)
+        
+        pool_window_width_3 = math.ceil(data_width/pyramid_3)
+        pool_window_height_3 = math.ceil(data_height/pyramid_3)
+        pool_stride_width_3 = math.floor(data_width/pyramid_3)
+        pool_stride_height_3 = math.floor(data_height/pyramid_3)
+        
+        
+        pool_1 = tf.nn.max_pool(relu,
+                              ksize=[1, pool_window_width_1, pool_window_height_1, 1],
+                              strides=[1, pool_stride_width_1, pool_stride_height_1, 1],
                               padding='VALID')
+        pool_2 = tf.nn.max_pool(relu,
+                              ksize=[1, pool_window_width_2, pool_window_height_2, 1],
+                              strides=[1, pool_stride_width_2, pool_stride_height_2, 1],
+                              padding='VALID')
+        pool_2 = tf.nn.max_pool(relu,
+                              ksize=[1, pool_window_width_3, pool_window_height_3, 1],
+                              strides=[1, pool_stride_width_3, pool_stride_height_3, 1],
+                              padding='VALID')
+            
         # Reshape the feature map cuboid into a 2D matrix to feed it to the
         # fully connected layers.
         pool_shape = pool.get_shape().as_list()
