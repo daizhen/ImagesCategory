@@ -105,6 +105,7 @@ def main(argv=None):  # pylint: disable=unused-argument
 
         # Extract it into numpy arrays.
         train_data = extract_data(train_data_filename, 60000)
+        print train_data.shape
         train_labels = extract_labels(train_labels_filename, 60000)
         test_data = extract_data(test_data_filename, 10000)
         test_labels = extract_labels(test_labels_filename, 10000)

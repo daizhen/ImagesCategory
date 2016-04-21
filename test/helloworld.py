@@ -1,6 +1,7 @@
 import tensorflow as tf
 
 import numpy as np
+import math
 
 hello = tf.constant("Hello");
 sess = tf.Session()
@@ -8,8 +9,9 @@ print sess.run(hello);
 
 
 # run a + b
-a = tf.Variable(1)
-b = tf.Variable(2)
+a = tf.Variable(1.2)
+b = tf.Variable(2.1)
+
 x1 = list()
 x1.append([1,2,3])
 x1.append([4,3])
@@ -18,7 +20,7 @@ print x
 print x1
 
 
-
+print sess.run(tf.div(a,b))
 
 
 
