@@ -3,7 +3,6 @@ import sys
 import urllib
 #import tensorflow.python.platform
 import numpy
-#import tensorflow as tf
 import csv
 from PIL import Image
 import random
@@ -117,18 +116,18 @@ def main(argv=None):
                             seed=SEED))
     conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]))
 	
-    '''
+    
     fc1_weights = tf.Variable(  # fully connected, depth 512.
-        tf.truncated_normal([IMAGE_SIZE / 4 * IMAGE_SIZE / 4 * 64, 512],
+        tf.truncated_normal([pyramid_1*pyramid_1 + pyramid_2*pyramid_2 + pyramid_3*pyramid_3, 512],
                             stddev=0.1,
                             seed=SEED))
     fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]))
+
     fc2_weights = tf.Variable(
         tf.truncated_normal([512, NUM_LABELS],
                             stddev=0.1,
                             seed=SEED))
     fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]))
-    '''
     
     # We will replicate the model structure for the training subgraph, as well
     # as the evaluation subgraphs, while sharing the trainable parameters.
@@ -186,20 +185,25 @@ def main(argv=None):
                               ksize=[1, pool_window_width_2, pool_window_height_2, 1],
                               strides=[1, pool_stride_width_2, pool_stride_height_2, 1],
                               padding='VALID')
-        pool_2 = tf.nn.max_pool(relu,
+        pool_3 = tf.nn.max_pool(relu,
                               ksize=[1, pool_window_width_3, pool_window_height_3, 1],
                               strides=[1, pool_stride_width_3, pool_stride_height_3, 1],
                               padding='VALID')
-            
-        # Reshape the feature map cuboid into a 2D matrix to feed it to the
-        # fully connected layers.
-        pool_shape = pool.get_shape().as_list()
-        reshape = tf.reshape(
-            pool,
-            [pool_shape[0], pool_shape[1] * pool_shape[2] * pool_shape[3]])
+        pool_shape_1 =  pool_1.get_shape().as_list()
+        pool_shape_2 =  pool_2.get_shape().as_list()
+        pool_shape_3 =  pool_3.get_shape().as_list()
+                             
+        reshaped_pool_1 = tf.reshape(pool_1,[pool_shape_1[1] * pool_shape_1[2] * pool_shape_1[3]])
+        reshaped_pool_2 = tf.reshape(pool_2,[pool_shape_2[1] * pool_shape_2[2] * pool_shape_2[3]])
+        reshaped_pool_3 = tf.reshape(pool_3,[pool_shape_3[1] * pool_shape_3[2] * pool_shape_3[3]])
+        
+        # Reshape the feature map cuboid into a 1D matrix to feed it to the fully connected layers.
+        # result_pool is a 1-D data.
+        result_pool = tf.concat(0,[reshaped_pool_1,reshaped_pool_2,reshaped_pool_3])
+
         # Fully connected layer. Note that the '+' operation automatically
         # broadcasts the biases.
-        hidden = tf.nn.relu(tf.matmul(reshape, fc1_weights) + fc1_biases)
+        hidden = tf.nn.relu(tf.matmul(result_pool, fc1_weights) + fc1_biases)
         # Add a 50% dropout during training only. Dropout also scales
         # activations such that no rescaling is needed at evaluation time.
         if train:
@@ -207,7 +211,8 @@ def main(argv=None):
         return tf.matmul(hidden, fc2_weights) + fc2_biases
 
     # Training computation: logits + cross-entropy loss.
-    logits = model(train_data_node, True)
+    logits = model([train_data_node], True)
+    
     loss = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(
         logits, train_labels_node))
@@ -236,8 +241,8 @@ def main(argv=None):
     # Predictions for the minibatch, validation set and test set.
     train_prediction = tf.nn.softmax(logits)
     # We'll compute them only once in a while by calling their {eval()} method.
-    validation_prediction = tf.nn.softmax(model(validation_data_node))
-    test_prediction = tf.nn.softmax(model(test_data_node))
+    validation_prediction = tf.nn.softmax(model([validation_data_node]))
+    test_prediction = tf.nn.softmax(model([test_data_node]))
 
     # Create a local session to run this computation.
     with tf.Session() as s:
