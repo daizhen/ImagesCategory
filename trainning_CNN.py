@@ -68,36 +68,45 @@ print x[0].shape
 def Train():
 	pass
 
+def LoadPossibleCategoryLabels():
+    return numpy.array(['request for information','request for service','incident'])
 def create_labels(original_labels,possible_labels):
      return (original_labels == possible_labels[:, None]).astype(numpy.float32)
      
 def main(argv=None):
-
+    # 70 persent for Train
     train_prop = 70
+    # 20 persent for validation
     validation_prop = 20
+    # 10 persent for test
     test_prop = 10
-    pyramid_1= 1 # pooling the image into 1x1 
-    pyramid_2= 10 # pooling the image into 10x10
+    
+    '''
+    Disable the pyramid 1 and 2 layers for simplification
+    '''
+    #pyramid_1= 1 # pooling the image into 1x1 
+    #pyramid_2= 10 # pooling the image into 10x10
     pyramid_3= 50 # pooling the image into 50x50
     
     # Get the data.
+    
+    possible_category_labels = LoadPossibleCategoryLabels()
+    
     all_data, all_labels = LoadCategoryData('sample_data/gray_images')
     train_size = int(train_prop * len(all_data)/100)
     validation_size = int(validation_prop * len(all_data)/100)
     test_size = int(test_prop * len(all_data)/100)
     
     train_data = all_data[:train_size - 1]
-    train_labels = all_labels[:train_size - 1]
+    train_labels = create_labels(all_labels[:train_size - 1], possible_category_labels)
     
     validation_data = all_data[train_size:train_size+validation_size -1]
-    validation_labels = all_labels[train_size:train_size+validation_size - 1]
+    validation_labels = create_labels(all_labels[train_size:train_size+validation_size - 1], possible_category_labels)
     
     test_data = all_data[train_size+validation_size:]
-    test_labels = all_labels[train_size+validation_size:]
-    
-    const_pyramid_1 = tf.constant(pyramid_1,dtype=tf.float32)
-    const_pyramid_2 = tf.constant(pyramid_2,dtype=tf.float32)
-    const_pyramid_3 = tf.constant(pyramid_3,dtype=tf.float32)
+    test_labels = create_labels(all_labels[train_size+validation_size:], possible_category_labels)
+    print test_data
+    print test_labels
     
     num_epochs = 10
     
@@ -106,10 +115,6 @@ def main(argv=None):
     # training step using the {feed_dict} argument to the Run() call below.
     train_data_node = tf.placeholder(tf.float32,shape=(1,None, None, NUM_CHANNELS))
     train_labels_node = tf.placeholder(tf.float32,shape=[1,NUM_LABELS])
-    
-    # For the validation and test data, we'll just hold the entire dataset in
-    # one constant node.
-    
     
     validation_data_node = tf.placeholder(tf.float32,shape=[1,None, None, NUM_CHANNELS])
     test_data_node = tf.placeholder(tf.float32,shape=[1,None, None, NUM_CHANNELS])
@@ -131,11 +136,22 @@ def main(argv=None):
 	
     image_width = tf.Variable(100.0)
     image_height = tf.Variable(100.0)
+    pool_window_width_3 = tf.Variable(0.0)
+    pool_window_height_3 =  tf.Variable(0.0)
+    pool_stride_width_3 =  tf.Variable(0.0)
+    pool_stride_height_3 =  tf.Variable(0.0)
     
+    '''
     fc1_weights = tf.Variable(  # fully connected, depth 512.
         tf.truncated_normal([pyramid_1*pyramid_1 + pyramid_2*pyramid_2 + pyramid_3*pyramid_3, 512],
                             stddev=0.1,
                             seed=SEED))
+    '''
+    fc1_weights = tf.Variable(  # fully connected, depth 512.
+        tf.truncated_normal([pyramid_3*pyramid_3, 512],
+                            stddev=0.1,
+                            seed=SEED))
+               
     fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]))
 
     fc2_weights = tf.Variable(
@@ -173,6 +189,7 @@ def main(argv=None):
         #Pyramid pooling to make the pool to the same size
         #data_width = relu.get_shape().as_list()[1]
         #data_height = relu.get_shape().as_list()[2] 
+        '''
         data_width = math.ceil(image_width.eval(sess)/2)
         data_height = math.ceil(image_height.eval(sess)/2)
         
@@ -192,6 +209,7 @@ def main(argv=None):
         pool_stride_width_3 = math.floor(data_width/pyramid_3)
         pool_stride_height_3 = math.floor(data_height / pyramid_3)  
         
+        
         pool_1 = tf.nn.max_pool(relu,
                               ksize=[1, pool_window_width_1, pool_window_height_1, 1],
                               strides=[1, pool_stride_width_1, pool_stride_height_1, 1],
@@ -201,22 +219,29 @@ def main(argv=None):
                               ksize=[1, pool_window_width_2, pool_window_height_2, 1],
                               strides=[1, pool_stride_width_2, pool_stride_height_2, 1],
                               padding='VALID')
+        '''
         pool_3 = tf.nn.max_pool(relu,
-                              ksize=[1, pool_window_width_3, pool_window_height_3, 1],
-                              strides=[1, pool_stride_width_3, pool_stride_height_3, 1],
+                              ksize=[1, pool_window_width_3.eval(sess), pool_window_height_3.eval(sess), 1],
+                              strides=[1, pool_stride_width_3.eval(sess), pool_stride_height_3.eval(sess), 1],
                               padding='VALID')
+        '''                              
         pool_shape_1 =  pool_1.get_shape().as_list()
         pool_shape_2 =  pool_2.get_shape().as_list()
+        '''
         pool_shape_3 =  pool_3.get_shape().as_list()
         
+        '''
         reshaped_pool_1 = tf.reshape(pool_1,[pyramid_1])
         reshaped_pool_2 = tf.reshape(pool_2,[pyramid_2*pyramid_2])
+        '''
         reshaped_pool_3 = tf.reshape(pool_3,[pyramid_3*pyramid_3])
         
         # Reshape the feature map cuboid into a 1D matrix to feed it to the fully connected layers.
         # result_pool is a 1-D data.
-        result_pool = tf.concat(0,[reshaped_pool_1,reshaped_pool_2,reshaped_pool_3])
-        result_pool = tf.reshape(result_pool,[1,pyramid_1*pyramid_1 + pyramid_2*pyramid_2 + pyramid_3*pyramid_3])
+        
+        #result_pool = tf.concat(0,[reshaped_pool_1,reshaped_pool_2,reshaped_pool_3])
+        #result_pool = tf.reshape(result_pool,[1,pyramid_1*pyramid_1 + pyramid_2*pyramid_2 + pyramid_3*pyramid_3])
+        result_pool = tf.reshape(reshaped_pool_3,[1,pyramid_3*pyramid_3])
 
         # Fully connected layer. Note that the '+' operation automatically
         # broadcasts the biases.
@@ -231,38 +256,6 @@ def main(argv=None):
         # Run all the initializers to prepare the trainable parameters.
         tf.initialize_all_variables().run()
         print 'Initialized!'
-        # Training computation: logits + cross-entropy loss.
-        logits = model(train_data_node,s, True)
-        
-        loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(
-            logits, train_labels_node))
-
-        # L2 regularization for the fully connected parameters.
-        regularizers = (tf.nn.l2_loss(fc1_weights) + tf.nn.l2_loss(fc1_biases) +
-                        tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases))
-        # Add the regularization term to the loss.
-        loss += 5e-4 * regularizers
-
-        # Optimizer: set up a variable that's incremented once per batch and
-        # controls the learning rate decay.
-        batch = tf.Variable(0)
-        # Decay once per epoch, using an exponential schedule starting at 0.01.
-        learning_rate = tf.train.exponential_decay(
-            0.01,                # Base learning rate.
-            batch,  # Current index into the dataset.
-            train_size,          # Decay step.
-            0.95,                # Decay rate.
-            staircase=True)
-        # Use simple momentum for the optimization.
-        optimizer = tf.train.MomentumOptimizer(learning_rate,0.9).minimize(loss,global_step=batch)
-
-        # Predictions for the minibatch, validation set and test set.
-        train_prediction = tf.nn.softmax(logits)
-        # We'll compute them only once in a while by calling their {eval()} method.
-        validation_prediction = tf.nn.softmax(model(validation_data_node,s))
-        test_prediction = tf.nn.softmax(model(test_data_node,s))
-
         # Loop through training steps.
         for step in xrange(int(num_epochs * train_size)):
             # Compute the offset of the current minibatch in the data.
@@ -271,28 +264,87 @@ def main(argv=None):
             
             datashape = train_data[offset].shape
             batch_data =numpy.reshape(train_data[offset],(1,datashape[0],datashape[1],1))
-            batch_labels = train_labels[offset]
+            batch_labels = [train_labels[:,offset]]
+            
+            current_image_width = s.run(image_width.assign(datashape[0]))
+            current_image_height = s.run(image_height.assign(datashape[1]))
+            
+            current_pool_window_width_3 = s.run(pool_window_width_3.assign(math.ceil(current_image_width/pyramid_3)))
+            current_pool_window_height_3 = s.run(pool_window_height_3.assign(math.ceil(current_image_height/pyramid_3)))
+            
+            current_pool_stride_width_3 =  s.run(pool_stride_width_3.assign(math.floor(current_image_width/pyramid_3)))
+            current_pool_stride_height_3 = s.run(pool_stride_height_3.assign(math.floor(current_image_height/pyramid_3)))
+            
+            print current_image_width
+            print current_image_height
+            print current_pool_window_width_3
+            print current_pool_window_height_3
+            
+            print current_pool_stride_width_3
+            print current_pool_stride_height_3
+            
+            # Training computation: logits + cross-entropy loss.
+            logits = model(train_data_node,s, True)
+            
+            loss = tf.reduce_mean(
+                tf.nn.softmax_cross_entropy_with_logits(
+                logits, train_labels_node))
+
+            # L2 regularization for the fully connected parameters.
+            regularizers = (tf.nn.l2_loss(fc1_weights) + tf.nn.l2_loss(fc1_biases) +
+                            tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases))
+            # Add the regularization term to the loss.
+            loss += 5e-4 * regularizers
+
+            # Optimizer: set up a variable that's incremented once per batch and
+            # controls the learning rate decay.
+            step = tf.Variable(0)
+            # Decay once per epoch, using an exponential schedule starting at 0.01.
+            learning_rate = tf.train.exponential_decay(
+                0.01,                # Base learning rate.
+                step,  # Current index into the dataset.
+                train_size,          # Decay step.
+                0.95,                # Decay rate.
+                staircase=True)
+            # Use simple momentum for the optimization.
+            optimizer = tf.train.MomentumOptimizer(learning_rate,0.9).minimize(loss,global_step=step)
+
+            # Predictions for the minibatch, validation set and test set.
+            train_prediction = tf.nn.softmax(logits)
+            # We'll compute them only once in a while by calling their {eval()} method.
+            
+            #validation_prediction = tf.nn.softmax(model(validation_data_node,s))
+            #test_prediction = tf.nn.softmax(model(test_data_node,s))
+            
             
             # This dictionary maps the batch data (as a numpy array) to the
             # node in the graph is should be fed to.
+            
+            print train_labels.shape
+            print batch_labels
+            
             feed_dict = {train_data_node: batch_data,
                          train_labels_node: batch_labels}
             # Run the graph and fetch some of the nodes.
+
             _, l, lr, predictions = s.run(
                 [optimizer, loss, learning_rate, train_prediction],
                 feed_dict=feed_dict)
+
             if step % 100 == 0:
-                print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
+                print 'Epoch %.2f' % (float(step) / train_size)
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
-                print 'Minibatch error: %.1f%%' % error_rate(predictions,
-                                                             batch_labels)
+                print 'Minibatch error: %.1f%%' % error_rate(predictions, batch_labels)
+                '''
                 print 'Validation error: %.1f%%' % error_rate(
                     validation_prediction.eval(), validation_labels)
+                '''
                 sys.stdout.flush()
         # Finally print the result!
+        '''
         test_error = error_rate(test_prediction.eval(), test_labels)
         print 'Test error: %.1f%%' % test_error
-        '''
+        
         if FLAGS.self_test:
             print 'test_error', test_error
             assert test_error == 0.0, 'expected 0.0 test_error, got %.2f' % (test_error,)
