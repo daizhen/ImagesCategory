@@ -26,7 +26,7 @@ PIXEL_DEPTH = 255
 NUM_LABELS = 3
 VALIDATION_SIZE = 200  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
-BATCH_SIZE = 64
+BATCH_SIZE = 2
 NUM_EPOCHS = 10
 
 
@@ -79,8 +79,8 @@ def LoadCategoryData(imageDir):
         label_list[index] = numpy.where(all_classes == dataItem[1])[0][0]
     
     label_list_result = (numpy.arange(NUM_LABELS) == label_list[:, None]).astype(numpy.float32)
-    
-    print label_list_result
+    image_list = (image_list - (PIXEL_DEPTH / 2.0)) / PIXEL_DEPTH
+    print image_list
     return image_list,label_list
     
 def fake_data(num_images):
@@ -105,6 +105,14 @@ def error_rate(predictions, labels):
 
 
 def main(argv=None):  # pylint: disable=unused-argument
+    
+    # 70 persent for Train
+    train_prop = 70
+    # 20 persent for validation
+    validation_prop = 20
+    # 10 persent for test
+    test_prop = 10
+    
     if FLAGS.self_test:
         print 'Running self-test.'
         train_data, train_labels = fake_data(256)
@@ -112,24 +120,24 @@ def main(argv=None):  # pylint: disable=unused-argument
         test_data, test_labels = fake_data(256)
         num_epochs = 1
     else:
-        # Get the data.
-        train_data_filename = maybe_download('train-images-idx3-ubyte.gz')
-        train_labels_filename = maybe_download('train-labels-idx1-ubyte.gz')
-        test_data_filename = maybe_download('t10k-images-idx3-ubyte.gz')
-        test_labels_filename = maybe_download('t10k-labels-idx1-ubyte.gz')
-
-        # Extract it into numpy arrays.
-        train_data = extract_data(train_data_filename, 60000)
-
-        train_labels = extract_labels(train_labels_filename, 60000)
-        test_data = extract_data(test_data_filename, 10000)
-        test_labels = extract_labels(test_labels_filename, 10000)
+        all_data, all_labels = LoadCategoryData("sample_data/100_100")
         
-        # Generate a validation set.
-        validation_data = train_data[:VALIDATION_SIZE, :, :, :]
-        validation_labels = train_labels[:VALIDATION_SIZE]
-        train_data = train_data[VALIDATION_SIZE:, :, :, :]
-        train_labels = train_labels[VALIDATION_SIZE:]
+        train_size = int(train_prop * len(all_data)/100)
+        validation_size = int(validation_prop * len(all_data)/100)
+        test_size = int(test_prop * len(all_data)/100)
+        
+        # Extract it into numpy arrays.
+        train_data = all_data[:train_size - 1,:,:,:]
+
+        train_labels = all_labels[:train_size - 1]
+        
+        
+        validation_data = all_data[train_size:train_size+validation_size -1,:,:,:]
+        validation_labels = all_labels[train_size:train_size+validation_size -1]
+        
+        test_data = all_data[train_size:train_size+validation_size,:,:,:]
+        test_labels = all_labels[train_size:train_size+validation_size]
+        
         print "train_labels",train_labels.shape
         num_epochs = NUM_EPOCHS
     train_size = train_labels.shape[0]
@@ -286,5 +294,5 @@ def main(argv=None):  # pylint: disable=unused-argument
 
 
 if __name__ == '__main__':
-    #tf.app.run()
-    LoadCategoryData("sample_data/100_100")
+    tf.app.run()
+    #LoadCategoryData("sample_data/100_100")
