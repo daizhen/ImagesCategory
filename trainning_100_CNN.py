@@ -26,7 +26,7 @@ PIXEL_DEPTH = 255
 NUM_LABELS = 3
 VALIDATION_SIZE = 200  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
-BATCH_SIZE = 2
+BATCH_SIZE = 60
 NUM_EPOCHS = 10
 
 
@@ -62,14 +62,16 @@ def LoadCategoryData(imageDir):
     random.shuffle(data_list)
     print len(data_list)
     
+    image_count =10000
+    #len(data_list)
     image_list = numpy.ndarray( 
-        shape=(20, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS),
+        shape=(image_count, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS),
         dtype=numpy.float32)
         
-    label_list = numpy.ndarray(shape=[20], dtype=numpy.float32)
-    label_list_result = numpy.ndarray(shape=(20, NUM_LABELS), dtype=numpy.float32)
+    label_list = numpy.ndarray(shape=[image_count], dtype=numpy.float32)
+    label_list_result = numpy.ndarray(shape=(image_count, NUM_LABELS), dtype=numpy.float32)
     
-    for index in range(20):
+    for index in range(image_count):
         dataItem = data_list[index]
 
         image = Image.open(os.path.join(imageDir,dataItem[0]))   # image is a PIL image 
@@ -80,8 +82,9 @@ def LoadCategoryData(imageDir):
     
     label_list_result = (numpy.arange(NUM_LABELS) == label_list[:, None]).astype(numpy.float32)
     image_list = (image_list - (PIXEL_DEPTH / 2.0)) / PIXEL_DEPTH
-    print image_list
-    return image_list,label_list
+    #print image_list
+    #print label_list_result
+    return image_list,label_list_result
     
 def fake_data(num_images):
     """Generate a fake dataset that matches the dimensions of MNIST."""
@@ -120,17 +123,23 @@ def main(argv=None):  # pylint: disable=unused-argument
         test_data, test_labels = fake_data(256)
         num_epochs = 1
     else:
-        all_data, all_labels = LoadCategoryData("sample_data/100_100")
-        
+        all_data, all_labels = LoadCategoryData("data/100_100")
+        '''
         train_size = int(train_prop * len(all_data)/100)
         validation_size = int(validation_prop * len(all_data)/100)
         test_size = int(test_prop * len(all_data)/100)
+        '''
+        
+        train_size = len(all_data) - 1000
+        
+        validation_size = 500
+        test_size = 500
+        
         
         # Extract it into numpy arrays.
         train_data = all_data[:train_size - 1,:,:,:]
 
         train_labels = all_labels[:train_size - 1]
-        
         
         validation_data = all_data[train_size:train_size+validation_size -1,:,:,:]
         validation_labels = all_labels[train_size:train_size+validation_size -1]
@@ -257,6 +266,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     test_prediction = tf.nn.softmax(model(test_data_node))
 
     # Create a local session to run this computation.
+    saver=tf.train.Saver();
     with tf.Session() as s:
         # Run all the initializers to prepare the trainable parameters.
         tf.initialize_all_variables().run()
@@ -270,13 +280,18 @@ def main(argv=None):  # pylint: disable=unused-argument
             batch_labels = train_labels[offset:(offset + BATCH_SIZE)]
             # This dictionary maps the batch data (as a numpy array) to the
             # node in the graph is should be fed to.
+            #print batch_data.shape
             feed_dict = {train_data_node: batch_data,
                          train_labels_node: batch_labels}
             # Run the graph and fetch some of the nodes.
+            #print batch_data.shape
+            #print batch_labels.shape
+            #print train_labels
             _, l, lr, predictions = s.run(
                 [optimizer, loss, learning_rate, train_prediction],
                 feed_dict=feed_dict)
             if step % 100 == 0:
+                saver.save(s,save_path='./train_result')
                 print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,

@@ -1,0 +1,445 @@
+meta_info_def {
+  stripped_op_list {
+    op {
+      name: "Assign"
+      input_arg {
+        name: "ref"
+        type_attr: "T"
+        is_ref: true
+      }
+      input_arg {
+        name: "value"
+        type_attr: "T"
+      }
+      output_arg {
+        name: "output_ref"
+        type_attr: "T"
+        is_ref: true
+      }
+      attr {
+        name: "T"
+        type: "type"
+      }
+      attr {
+        name: "validate_shape"
+        type: "bool"
+        default_value {
+          b: true
+        }
+      }
+      attr {
+        name: "use_locking"
+        type: "bool"
+        default_value {
+          b: true
+        }
+      }
+      allows_uninitialized_input: true
+    }
+    op {
+      name: "Const"
+      output_arg {
+        name: "output"
+        type_attr: "dtype"
+      }
+      attr {
+        name: "value"
+        type: "tensor"
+      }
+      attr {
+        name: "dtype"
+        type: "type"
+      }
+    }
+    op {
+      name: "Identity"
+      input_arg {
+        name: "input"
+        type_attr: "T"
+      }
+      output_arg {
+        name: "output"
+        type_attr: "T"
+      }
+      attr {
+        name: "T"
+        type: "type"
+      }
+    }
+    op {
+      name: "NoOp"
+    }
+    op {
+      name: "Variable"
+      output_arg {
+        name: "ref"
+        type_attr: "dtype"
+        is_ref: true
+      }
+      attr {
+        name: "shape"
+        type: "shape"
+      }
+      attr {
+        name: "dtype"
+        type: "type"
+      }
+      attr {
+        name: "container"
+        type: "string"
+        default_value {
+          s: ""
+        }
+      }
+      attr {
+        name: "shared_name"
+        type: "string"
+        default_value {
+          s: ""
+        }
+      }
+      is_stateful: true
+    }
+  }
+}
+graph_def {
+  node {
+    name: "Variable/initial_value"
+    op: "Const"
+    attr {
+      key: "dtype"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "value"
+      value {
+        tensor {
+          dtype: DT_INT32
+          tensor_shape {
+          }
+          int_val: 10
+        }
+      }
+    }
+  }
+  node {
+    name: "Variable"
+    op: "Variable"
+    attr {
+      key: "container"
+      value {
+        s: ""
+      }
+    }
+    attr {
+      key: "dtype"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "shape"
+      value {
+        shape {
+        }
+      }
+    }
+    attr {
+      key: "shared_name"
+      value {
+        s: ""
+      }
+    }
+  }
+  node {
+    name: "Variable/Assign"
+    op: "Assign"
+    input: "Variable"
+    input: "Variable/initial_value"
+    attr {
+      key: "T"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "use_locking"
+      value {
+        b: true
+      }
+    }
+    attr {
+      key: "validate_shape"
+      value {
+        b: true
+      }
+    }
+  }
+  node {
+    name: "Variable/read"
+    op: "Identity"
+    input: "Variable"
+    attr {
+      key: "T"
+      value {
+        type: DT_INT32
+      }
+    }
+  }
+  node {
+    name: "Variable_1/initial_value"
+    op: "Const"
+    attr {
+      key: "dtype"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "value"
+      value {
+        tensor {
+          dtype: DT_INT32
+          tensor_shape {
+          }
+          int_val: 2
+        }
+      }
+    }
+  }
+  node {
+    name: "Variable_1"
+    op: "Variable"
+    attr {
+      key: "container"
+      value {
+        s: ""
+      }
+    }
+    attr {
+      key: "dtype"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "shape"
+      value {
+        shape {
+        }
+      }
+    }
+    attr {
+      key: "shared_name"
+      value {
+        s: ""
+      }
+    }
+  }
+  node {
+    name: "Variable_1/Assign"
+    op: "Assign"
+    input: "Variable_1"
+    input: "Variable_1/initial_value"
+    attr {
+      key: "T"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "use_locking"
+      value {
+        b: true
+      }
+    }
+    attr {
+      key: "validate_shape"
+      value {
+        b: true
+      }
+    }
+  }
+  node {
+    name: "Variable_1/read"
+    op: "Identity"
+    input: "Variable_1"
+    attr {
+      key: "T"
+      value {
+        type: DT_INT32
+      }
+    }
+  }
+  node {
+    name: "pool/initial_value"
+    op: "Const"
+    attr {
+      key: "dtype"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "value"
+      value {
+        tensor {
+          dtype: DT_INT32
+          tensor_shape {
+            dim {
+              size: 4
+            }
+          }
+          tensor_content: "\001\000\000\000\002\000\000\000\002\000\000\000\001\000\000\000"
+        }
+      }
+    }
+  }
+  node {
+    name: "pool"
+    op: "Variable"
+    attr {
+      key: "container"
+      value {
+        s: ""
+      }
+    }
+    attr {
+      key: "dtype"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "shape"
+      value {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+    attr {
+      key: "shared_name"
+      value {
+        s: ""
+      }
+    }
+  }
+  node {
+    name: "pool/Assign"
+    op: "Assign"
+    input: "pool"
+    input: "pool/initial_value"
+    attr {
+      key: "T"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "use_locking"
+      value {
+        b: true
+      }
+    }
+    attr {
+      key: "validate_shape"
+      value {
+        b: true
+      }
+    }
+  }
+  node {
+    name: "pool/read"
+    op: "Identity"
+    input: "pool"
+    attr {
+      key: "T"
+      value {
+        type: DT_INT32
+      }
+    }
+  }
+  node {
+    name: "init"
+    op: "NoOp"
+    input: "^Variable/Assign"
+    input: "^Variable_1/Assign"
+    input: "^pool/Assign"
+  }
+  node {
+    name: "Assign/value"
+    op: "Const"
+    attr {
+      key: "dtype"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "value"
+      value {
+        tensor {
+          dtype: DT_INT32
+          tensor_shape {
+            dim {
+              size: 4
+            }
+          }
+          tensor_content: "\001\000\000\000\003\000\000\000\003\000\000\000\001\000\000\000"
+        }
+      }
+    }
+  }
+  node {
+    name: "Assign"
+    op: "Assign"
+    input: "pool"
+    input: "Assign/value"
+    attr {
+      key: "T"
+      value {
+        type: DT_INT32
+      }
+    }
+    attr {
+      key: "use_locking"
+      value {
+        b: false
+      }
+    }
+    attr {
+      key: "validate_shape"
+      value {
+        b: true
+      }
+    }
+  }
+  versions {
+    producer: 8
+  }
+}
+collection_def {
+  key: "trainable_variables"
+  value {
+    bytes_list {
+      value: "\n\nVariable:0\022\017Variable/Assign\032\017Variable/read:0"
+      value: "\n\014Variable_1:0\022\021Variable_1/Assign\032\021Variable_1/read:0"
+      value: "\n\006pool:0\022\013pool/Assign\032\013pool/read:0"
+    }
+  }
+}
+collection_def {
+  key: "variables"
+  value {
+    bytes_list {
+      value: "\n\nVariable:0\022\017Variable/Assign\032\017Variable/read:0"
+      value: "\n\014Variable_1:0\022\021Variable_1/Assign\032\021Variable_1/read:0"
+      value: "\n\006pool:0\022\013pool/Assign\032\013pool/read:0"
+    }
+  }
+}
