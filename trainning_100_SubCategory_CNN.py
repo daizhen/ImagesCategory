@@ -33,15 +33,27 @@ NUM_EPOCHS = 10
 tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
 
-def LoadPossibleCategoryLabels():
-    return numpy.array(['request for information','request for service','incident'])
-def create_labels(original_labels,possible_labels):
-     return (original_labels == possible_labels[:, None]).astype(numpy.float32)
-     
-def LoadCategoryData(imageDir):
+def LoadPossibleLabels():
+    fileName='subcategory_name_id_map.csv'
+    csvfile = file(fileName, 'rb')
+    reader = csv.reader(csvfile)
+    index = 0
+	
+    label_list = list()
+    for line in reader:
+        if index != 0:
+            currentLabel = line[0]
+            if not currentLabel in label_list:
+                
+                label_list.append(currentLabel);
+        index +=1
+    csvfile.close()
+    return numpy.array(label_list)
+
+def LoadData(imageDir):
     
-    all_classes = LoadPossibleCategoryLabels()
-    fullFileName = 'all_category_data.csv'
+    all_classes = LoadPossibleLabels()
+    fullFileName = 'all_subcategory_data.csv'
     csvfile = file(fullFileName, 'rb')
     reader = csv.reader(csvfile)
     index = 0
@@ -78,8 +90,12 @@ def LoadCategoryData(imageDir):
         array = numpy.array(image)        # array is a numpy array
         image_list[index,:,:,:] = numpy.reshape(array,(IMAGE_SIZE,IMAGE_SIZE,NUM_CHANNELS));
         
-        label_list[index] = numpy.where(all_classes == dataItem[1])[0][0]
-    
+        try:
+        
+            label_list[index] = numpy.where(all_classes == dataItem[1])[0][0]
+        except:
+            print "error:",  dataItem
+    print 'here'
     label_list_result = (numpy.arange(NUM_LABELS) == label_list[:, None]).astype(numpy.float32)
     image_list = (image_list - (PIXEL_DEPTH / 2.0)) / PIXEL_DEPTH
     #print image_list
@@ -123,7 +139,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         test_data, test_labels = fake_data(256)
         num_epochs = 1
     else:
-        all_data, all_labels = LoadCategoryData("data/100_100")
+        all_data, all_labels = LoadData("data/100_100")
         '''
         train_size = int(train_prop * len(all_data)/100)
         validation_size = int(validation_prop * len(all_data)/100)
@@ -268,7 +284,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     # Create a local session to run this computation.
     saver=tf.train.Saver();
     #Save the graph model
-    tf.train.export_meta_graph(filename='./models/category/graph.save', as_text=True)
+    tf.train.export_meta_graph(filename='./models/subcategory/graph.save', as_text=True)
     with tf.Session() as s:
         # Run all the initializers to prepare the trainable parameters.
         tf.initialize_all_variables().run()
@@ -293,7 +309,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                 [optimizer, loss, learning_rate, train_prediction],
                 feed_dict=feed_dict)
             if step % 100 == 0:
-                saver.save(s,save_path='./models/category/train_result')
+                saver.save(s,save_path='./models/subcategory/train_result')
                 print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,
@@ -301,7 +317,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                 print 'Validation error: %.1f%%' % error_rate(
                     validation_prediction.eval(), validation_labels)
                 sys.stdout.flush()
-        saver.save(s,save_path='./models/category/train_result')
+        saver.save(s,save_path='./models/subcategory/train_result')
         # Finally print the result!
         test_error = error_rate(test_prediction.eval(), test_labels)
         print 'Test error: %.1f%%' % test_error
