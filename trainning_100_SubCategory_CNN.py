@@ -18,7 +18,6 @@ import random
 import math
 from PIL import Image
 
-SOURCE_URL = 'http://yann.lecun.com/exdb/mnist/'
 WORK_DIRECTORY = 'data'
 IMAGE_SIZE = 100
 NUM_CHANNELS = 1
@@ -160,8 +159,8 @@ def main(argv=None):  # pylint: disable=unused-argument
         validation_data = all_data[train_size:train_size+validation_size -1,:,:,:]
         validation_labels = all_labels[train_size:train_size+validation_size -1]
         
-        test_data = all_data[train_size:train_size+validation_size,:,:,:]
-        test_labels = all_labels[train_size:train_size+validation_size]
+        test_data = all_data[train_size+validation_size:,:,:,:]
+        test_labels = all_labels[train_size+validation_size:]
         
         print "train_labels",train_labels.shape
         num_epochs = NUM_EPOCHS
