@@ -1,0 +1,295 @@
+name,id
+enhancement request,0
+user,1
+sap,2
+general,3
+server maintenance and support,4
+bundle lean (itio use only),5
+configuration,6
+misc,7
+business process,8
+ad hoc conferencing,9
+pc return,10
+my pc order,11
+request a pc,12
+pcl tools and links,13
+alm,14
+rdbms incident,15
+contract,16
+activate,17
+desktop sharing,18
+nonstop,19
+handset,20
+hardware - storage,21
+catw - new catw user - account issues,22
+agent profiles,23
+hpop backoffice,24
+transformation,25
+lync,26
+am dashboard,27
+abap-java,28
+managed messaging,29
+decentralize,30
+phones,31
+contract amendments,32
+cancel,33
+automated provisioning,34
+scripting,35
+click-to-talk,36
+NULL,37
+sim order,38
+groups,39
+lan administration,40
+remote access,41
+applications,42
+change number,43
+informatica,44
+browser issue,45
+unix,46
+e3t - reforecasting,47
+windows os,48
+hbase,49
+cloud service usage,50
+reinstate,51
+firewall-consulting,52
+registration issues,53
+google profile,54
+tidal job,55
+other,56
+server build,57
+collector code mapping (ccm),58
+rdbms service,59
+getpaid,60
+infrastructure,61
+hardware load balancer,62
+windows,63
+dataprotector,64
+hangouts,65
+activkey,66
+sites,67
+linux,68
+infastructure mgmt,69
+vertica database,70
+dns-infrastructure,71
+new subscription,72
+project - wbs create - maintain - close,73
+eva,74
+customer master-crs,75
+sync tool,76
+port,77
+services360 - other,78
+bug,79
+enterprise os,80
+sap performance - availability,81
+feature add/remove,82
+change owner,83
+tidal master,84
+email (mms/afaria),85
+application share,86
+lan-infrastructure,87
+qlikview,88
+product and pricing,89
+connectivity,90
+bpia,91
+order pc,92
+storage device,93
+linux os,94
+sap set up issue,95
+autonomy,96
+request access,97
+sales order - create - maintain,98
+data card order,99
+sfdc - esam boundary issue,100
+hardware,101
+cellular,102
+hp exstream-command center,103
+vc3 conference,104
+ceid,105
+sitescope,106
+user share,107
+pbx infrastructure,108
+web agent,109
+flash admin,110
+bac,111
+document editors,112
+firewall-infrastructure,113
+diagnostics,114
+pracs,115
+oracle database,116
+as400,117
+ptr,118
+ap online,119
+virtual credit intelligence (vci),120
+esam - other,121
+anti adware - anti spyware,122
+coverage,123
+agent sets,124
+database client,125
+infrastructure mgmt,126
+sftp,127
+sharepoint 2013,128
+time and matl - workflow,129
+oath token,130
+hadoop,131
+nt account,132
+catw - time entry - adjustment,133
+centers of excellence (coe) model,134
+dispute resolution system (drs),135
+google drive,136
+device order,137
+sharepoint 2010,138
+virtual credit professional (vcp),139
+client,140
+csn - ww pack reports,141
+virtual badge,142
+smartphone order,143
+vms,144
+windows 8,145
+communication,146
+tidal agent,147
+rfc request,148
+3par,149
+miscellaneous,150
+policy clarification,151
+"services360 - upload files, update links",152
+reports,153
+as2 seeburger,154
+hadoop vertica connector,155
+retrigger order,156
+renewal amendments,157
+services360 - translations,158
+bitlocker encryption,159
+wls proxy plug-in,160
+sharepoint,161
+issue when printing,162
+copy/scan/fax,163
+invoicing ? missing billing,164
+sales order - customer - partners - material codes,165
+services360 - customer registration issue,166
+warranty,167
+hardware break/fix,168
+high usage,169
+accessories,170
+rfcupdate-other,171
+pcl policy and rules,172
+package,173
+ms virtual pc,174
+nsk,175
+flash dc,176
+remote access vpn client,177
+cisco,178
+renewal process,179
+srpa,180
+hive/chat,181
+slam,182
+wan-infrastructure,183
+server-other,184
+hardware pilot,185
+csn access request,186
+xp,187
+dor,188
+spa - pricing document,189
+inbound service,190
+invoicing ? batchjob issue,191
+hp exstream-design environment,192
+compass - out of scope,193
+esam - precache,194
+desktop/ laptop support,195
+compass - other,196
+boss,197
+psp update,198
+finance - cje0 report,199
+class a certificate,200
+centralize,201
+amp,202
+others,203
+zero usage,204
+esam - visibility issue,205
+research,206
+dialup modem software-pal,207
+class b certificate,208
+server,209
+apache,210
+finance - results analysis,211
+siebel crm,212
+sales order - dor,213
+sap errors,214
+siteminder web agent,215
+edge,216
+wlm,217
+cats - time entry - post labor costs - report,218
+usage/cost,219
+storage management,220
+group share,221
+customer doc (imaging - printing - viewing),222
+ecosystem health,223
+hps-ic,224
+windows 7,225
+partner set up,226
+esam - company - login creation,227
+domain account,228
+application integration,229
+pc setup,230
+hpp id,231
+rfcupdate-ci,232
+merge care pack,233
+invoicing ? credit query,234
+purchase order - general,235
+mapreduce,236
+cancel care pack,237
+msa,238
+invoicing ? reprint invoice,239
+csif for channel partners,240
+pc phone,241
+other support,242
+weblogic,243
+lotus - notes - domino,244
+cats - pa30 record - hr daily feed - labor rate,245
+purchase requisition - create - change - release - close,246
+pagers,247
+epm suite11 (harp),248
+backup restore request,249
+rum,250
+sales order - time and matl - rrb - billing,251
+lan,252
+operating system,253
+iis,254
+profiles,255
+pc backup - mip,256
+project - icoem (es - ts),257
+hpps,258
+oo,259
+activation link,260
+wireless wan card,261
+"services360 - pdf, html view & download",262
+new business quote (nbq),263
+invoice issue,264
+compass,265
+ip address,266
+reset care pack,267
+sun,268
+os and software installation,269
+enterprise business printer,270
+reports - bw compass,271
+reg backlogs - queue issues,272
+cable,273
+esam - file export,274
+per event - non-education,275
+pc backup - iron mountain,276
+lab asset,277
+bpm,278
+windows update services,279
+return-dispose of pc,280
+process enquiries,281
+wwas related,282
+proxy-infrastructure,283
+invoicing ? tax query,284
+security,285
+keyboard - laptop,286
+meetings,287
+smart portal,288
+voicemail,289
+system - performance - printing - sapgui,290
+citrix,291
+memory,292
+purchase order - ses - gr - ir,293

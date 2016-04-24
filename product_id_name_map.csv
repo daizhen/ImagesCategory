@@ -1,0 +1,295 @@
+id,name
+0,enhancement request
+1,user
+2,sap
+3,general
+4,server maintenance and support
+5,bundle lean (itio use only)
+6,configuration
+7,misc
+8,business process
+9,ad hoc conferencing
+10,pc return
+11,my pc order
+12,request a pc
+13,pcl tools and links
+14,alm
+15,rdbms incident
+16,contract
+17,activate
+18,desktop sharing
+19,nonstop
+20,handset
+21,hardware - storage
+22,catw - new catw user - account issues
+23,agent profiles
+24,hpop backoffice
+25,transformation
+26,lync
+27,am dashboard
+28,abap-java
+29,managed messaging
+30,decentralize
+31,phones
+32,contract amendments
+33,cancel
+34,automated provisioning
+35,scripting
+36,click-to-talk
+37,NULL
+38,sim order
+39,groups
+40,lan administration
+41,remote access
+42,applications
+43,change number
+44,informatica
+45,browser issue
+46,unix
+47,e3t - reforecasting
+48,windows os
+49,hbase
+50,cloud service usage
+51,reinstate
+52,firewall-consulting
+53,registration issues
+54,google profile
+55,tidal job
+56,other
+57,server build
+58,collector code mapping (ccm)
+59,rdbms service
+60,getpaid
+61,infrastructure
+62,hardware load balancer
+63,windows
+64,dataprotector
+65,hangouts
+66,activkey
+67,sites
+68,linux
+69,infastructure mgmt
+70,vertica database
+71,dns-infrastructure
+72,new subscription
+73,project - wbs create - maintain - close
+74,eva
+75,customer master-crs
+76,sync tool
+77,port
+78,services360 - other
+79,bug
+80,enterprise os
+81,sap performance - availability
+82,feature add/remove
+83,change owner
+84,tidal master
+85,email (mms/afaria)
+86,application share
+87,lan-infrastructure
+88,qlikview
+89,product and pricing
+90,connectivity
+91,bpia
+92,order pc
+93,storage device
+94,linux os
+95,sap set up issue
+96,autonomy
+97,request access
+98,sales order - create - maintain
+99,data card order
+100,sfdc - esam boundary issue
+101,hardware
+102,cellular
+103,hp exstream-command center
+104,vc3 conference
+105,ceid
+106,sitescope
+107,user share
+108,pbx infrastructure
+109,web agent
+110,flash admin
+111,bac
+112,document editors
+113,firewall-infrastructure
+114,diagnostics
+115,pracs
+116,oracle database
+117,as400
+118,ptr
+119,ap online
+120,virtual credit intelligence (vci)
+121,esam - other
+122,anti adware - anti spyware
+123,coverage
+124,agent sets
+125,database client
+126,infrastructure mgmt
+127,sftp
+128,sharepoint 2013
+129,time and matl - workflow
+130,oath token
+131,hadoop
+132,nt account
+133,catw - time entry - adjustment
+134,centers of excellence (coe) model
+135,dispute resolution system (drs)
+136,google drive
+137,device order
+138,sharepoint 2010
+139,virtual credit professional (vcp)
+140,client
+141,csn - ww pack reports
+142,virtual badge
+143,smartphone order
+144,vms
+145,windows 8
+146,communication
+147,tidal agent
+148,rfc request
+149,3par
+150,miscellaneous
+151,policy clarification
+152,"services360 - upload files, update links"
+153,reports
+154,as2 seeburger
+155,hadoop vertica connector
+156,retrigger order
+157,renewal amendments
+158,services360 - translations
+159,bitlocker encryption
+160,wls proxy plug-in
+161,sharepoint
+162,issue when printing
+163,copy/scan/fax
+164,invoicing ? missing billing
+165,sales order - customer - partners - material codes
+166,services360 - customer registration issue
+167,warranty
+168,hardware break/fix
+169,high usage
+170,accessories
+171,rfcupdate-other
+172,pcl policy and rules
+173,package
+174,ms virtual pc
+175,nsk
+176,flash dc
+177,remote access vpn client
+178,cisco
+179,renewal process
+180,srpa
+181,hive/chat
+182,slam
+183,wan-infrastructure
+184,server-other
+185,hardware pilot
+186,csn access request
+187,xp
+188,dor
+189,spa - pricing document
+190,inbound service
+191,invoicing ? batchjob issue
+192,hp exstream-design environment
+193,compass - out of scope
+194,esam - precache
+195,desktop/ laptop support
+196,compass - other
+197,boss
+198,psp update
+199,finance - cje0 report
+200,class a certificate
+201,centralize
+202,amp
+203,others
+204,zero usage
+205,esam - visibility issue
+206,research
+207,dialup modem software-pal
+208,class b certificate
+209,server
+210,apache
+211,finance - results analysis
+212,siebel crm
+213,sales order - dor
+214,sap errors
+215,siteminder web agent
+216,edge
+217,wlm
+218,cats - time entry - post labor costs - report
+219,usage/cost
+220,storage management
+221,group share
+222,customer doc (imaging - printing - viewing)
+223,ecosystem health
+224,hps-ic
+225,windows 7
+226,partner set up
+227,esam - company - login creation
+228,domain account
+229,application integration
+230,pc setup
+231,hpp id
+232,rfcupdate-ci
+233,merge care pack
+234,invoicing ? credit query
+235,purchase order - general
+236,mapreduce
+237,cancel care pack
+238,msa
+239,invoicing ? reprint invoice
+240,csif for channel partners
+241,pc phone
+242,other support
+243,weblogic
+244,lotus - notes - domino
+245,cats - pa30 record - hr daily feed - labor rate
+246,purchase requisition - create - change - release - close
+247,pagers
+248,epm suite11 (harp)
+249,backup restore request
+250,rum
+251,sales order - time and matl - rrb - billing
+252,lan
+253,operating system
+254,iis
+255,profiles
+256,pc backup - mip
+257,project - icoem (es - ts)
+258,hpps
+259,oo
+260,activation link
+261,wireless wan card
+262,"services360 - pdf, html view & download"
+263,new business quote (nbq)
+264,invoice issue
+265,compass
+266,ip address
+267,reset care pack
+268,sun
+269,os and software installation
+270,enterprise business printer
+271,reports - bw compass
+272,reg backlogs - queue issues
+273,cable
+274,esam - file export
+275,per event - non-education
+276,pc backup - iron mountain
+277,lab asset
+278,bpm
+279,windows update services
+280,return-dispose of pc
+281,process enquiries
+282,wwas related
+283,proxy-infrastructure
+284,invoicing ? tax query
+285,security
+286,keyboard - laptop
+287,meetings
+288,smart portal
+289,voicemail
+290,system - performance - printing - sapgui
+291,citrix
+292,memory
+293,purchase order - ses - gr - ir

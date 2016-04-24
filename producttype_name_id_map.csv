@@ -1,0 +1,26 @@
+name,id
+application,0
+hp cloud,1
+pc hardware,2
+network,3
+gbs application,4
+database - other,5
+infrastructure,6
+app. infrastructure,7
+voice,8
+print,9
+shared lab services,10
+monitoring,11
+database - oracle,12
+database - mssql,13
+authentication,14
+active directory,15
+pc accessories,16
+pc software,17
+file share - messaging - collaboration,18
+change management,19
+remote connectivity-hp,20
+database,21
+facilities,22
+database - neo,23
+pc setup - migration - backup - recovery,24

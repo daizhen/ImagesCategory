@@ -1,0 +1,26 @@
+id,name
+0,application
+1,hp cloud
+2,pc hardware
+3,network
+4,gbs application
+5,database - other
+6,infrastructure
+7,app. infrastructure
+8,voice
+9,print
+10,shared lab services
+11,monitoring
+12,database - oracle
+13,database - mssql
+14,authentication
+15,active directory
+16,pc accessories
+17,pc software
+18,file share - messaging - collaboration
+19,change management
+20,remote connectivity-hp
+21,database
+22,facilities
+23,database - neo
+24,pc setup - migration - backup - recovery
