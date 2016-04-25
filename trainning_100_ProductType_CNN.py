@@ -173,8 +173,15 @@ def main(argv=None):  # pylint: disable=unused-argument
                                        shape=(BATCH_SIZE, NUM_LABELS))
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
-    validation_data_node = tf.constant(validation_data)
-    test_data_node = tf.constant(test_data)
+    #validation_data_node = tf.constant(validation_data)
+    #test_data_node = tf.constant(test_data)
+    
+    validation_data_node = tf.placeholder(
+        tf.float32,
+        shape=(BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
+    test_data_node = tf.placeholder(
+        tf.float32,
+        shape=(BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
 
     # The variables below hold all the trainable weights. They are passed an
     # initial value which will be assigned when when we call:
@@ -182,25 +189,28 @@ def main(argv=None):  # pylint: disable=unused-argument
     conv1_weights = tf.Variable(
         tf.truncated_normal([5, 5, NUM_CHANNELS, 32],  # 5x5 filter, depth 32.
                             stddev=0.1,
-                            seed=SEED))
-    conv1_biases = tf.Variable(tf.zeros([32]))
+                            seed=SEED), name='conv1_weights')
+    conv1_biases = tf.Variable(tf.zeros([32]), name='conv1_biases')
 	
     conv2_weights = tf.Variable(
         tf.truncated_normal([5, 5, 32, 64],
                             stddev=0.1,
-                            seed=SEED))
-    conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]))
+                            seed=SEED), name='conv2_weights')
+    conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv2_biases')
 	
     fc1_weights = tf.Variable(  # fully connected, depth 512.
         tf.truncated_normal([IMAGE_SIZE / 4 * IMAGE_SIZE / 4 * 64, 512],
                             stddev=0.1,
-                            seed=SEED))
-    fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]))
+                            seed=SEED), name='fc1_weights')
+    fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]), name='fc1_biases')
     fc2_weights = tf.Variable(
         tf.truncated_normal([512, NUM_LABELS],
                             stddev=0.1,
-                            seed=SEED))
-    fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]))
+                            seed=SEED), name='fc2_weights')
+    fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]), name='fc2_biases')
+    
+    # Var list to save
+    varlist = [conv1_weights,conv1_biases,conv2_weights,conv2_biases,fc1_weights,fc1_biases,fc2_weights,fc2_biases]
 
     # We will replicate the model structure for the training subgraph, as well
     # as the evaluation subgraphs, while sharing the trainable parameters.
@@ -278,10 +288,12 @@ def main(argv=None):  # pylint: disable=unused-argument
     test_prediction = tf.nn.softmax(model(test_data_node))
 
     # Create a local session to run this computation.
-    saver=tf.train.Saver();
+    saver=tf.train.Saver(varlist);
     #Save the graph model
-    tf.train.export_meta_graph(filename='./models/producttype/graph.save', as_text=True)
+    #tf.train.export_meta_graph(filename='./models/producttype/graph.save', as_text=True)
     with tf.Session() as s:
+        #Save the graph model
+        tf.train.write_graph(s.graph_def, '', './models/producttype/graph.pb', as_text=False)
         # Run all the initializers to prepare the trainable parameters.
         tf.initialize_all_variables().run()
         print 'Initialized!'
@@ -311,11 +323,11 @@ def main(argv=None):  # pylint: disable=unused-argument
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,
                                                              batch_labels)
                 print 'Validation error: %.1f%%' % error_rate(
-                    s.run(validation_prediction), validation_labels)
+                    s.run(validation_prediction, feed_dict = {train_data_node: validation_data}), validation_labels)
                 sys.stdout.flush()
         saver.save(s,save_path='./models/producttype/train_result')
         # Finally print the result!
-        test_error = error_rate(test_prediction.eval(), test_labels)
+        test_error = error_rate( s.run(test_prediction, feed_dict = {train_data_node: test_data}), test_labels)
         print 'Test error: %.1f%%' % test_error
         if FLAGS.self_test:
             print 'test_error', test_error

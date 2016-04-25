@@ -24,3 +24,4 @@ saver=tf.train.Saver();
 saver.save(sess,save_path='./train_result')
 #close the session 
 sess.close();
+
