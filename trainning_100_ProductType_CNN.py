@@ -149,12 +149,12 @@ def main(argv=None):  # pylint: disable=unused-argument
         train_size = len(all_data) - validation_size- test_size
         
         # Extract it into numpy arrays.
-        train_data = all_data[:train_size - 1,:,:,:]
+        train_data = all_data[:train_size,:,:,:]
 
-        train_labels = all_labels[:train_size - 1]
+        train_labels = all_labels[:train_size]
         
-        validation_data = all_data[train_size:train_size+validation_size -1,:,:,:]
-        validation_labels = all_labels[train_size:train_size+validation_size -1]
+        validation_data = all_data[train_size:train_size+validation_size,:,:,:]
+        validation_labels = all_labels[train_size:train_size+validation_size]
         
         test_data = all_data[train_size+validation_size:,:,:,:]
         test_labels = all_labels[train_size+validation_size:]
@@ -178,10 +178,14 @@ def main(argv=None):  # pylint: disable=unused-argument
     
     validation_data_node = tf.placeholder(
         tf.float32,
-        shape=(BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
+        shape=(validation_size, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
     test_data_node = tf.placeholder(
         tf.float32,
-        shape=(BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
+        shape=(test_size, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
+        
+    check_data_node = tf.placeholder(
+        tf.float32,
+        shape=(1, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS), name='check_data_node')
 
     # The variables below hold all the trainable weights. They are passed an
     # initial value which will be assigned when when we call:
@@ -323,11 +327,11 @@ def main(argv=None):  # pylint: disable=unused-argument
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,
                                                              batch_labels)
                 print 'Validation error: %.1f%%' % error_rate(
-                    s.run(validation_prediction, feed_dict = {train_data_node: validation_data}), validation_labels)
+                    s.run(validation_prediction, feed_dict = {validation_data_node: validation_data}), validation_labels)
                 sys.stdout.flush()
         saver.save(s,save_path='./models/producttype/train_result')
         # Finally print the result!
-        test_error = error_rate( s.run(test_prediction, feed_dict = {train_data_node: test_data}), test_labels)
+        test_error = error_rate( s.run(test_prediction, feed_dict = {test_data_node: test_data}), test_labels)
         print 'Test error: %.1f%%' % test_error
         if FLAGS.self_test:
             print 'test_error', test_error
