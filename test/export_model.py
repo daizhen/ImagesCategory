@@ -4,8 +4,6 @@ import numpy as np
 import math
 from tensorflow.python.platform import gfile
 
-
-
 a = tf.Variable(10)
 b = tf.Variable(2)
 
