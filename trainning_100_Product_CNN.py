@@ -295,7 +295,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             if step % 100 == 0:
                 saver.save(s,save_path='./models/category/train_result')
                 print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
-                print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
+                print 'Minibatch loss: %.8f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,
                                                              batch_labels)
                 print 'Validation error: %.1f%%' % error_rate(

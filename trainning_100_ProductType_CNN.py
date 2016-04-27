@@ -145,8 +145,8 @@ def main(argv=None):  # pylint: disable=unused-argument
         test_size = int(test_prop * len(all_data)/100)
         '''
         validation_size = 500
-        test_size = 500
-        train_size = len(all_data) - validation_size- test_size
+        test_size = 1000
+        train_size =len(all_data) - validation_size- test_size
         
         # Extract it into numpy arrays.
         train_data = all_data[:train_size,:,:,:]
@@ -290,16 +290,25 @@ def main(argv=None):  # pylint: disable=unused-argument
     # We'll compute them only once in a while by calling their {eval()} method.
     validation_prediction = tf.nn.softmax(model(validation_data_node))
     test_prediction = tf.nn.softmax(model(test_data_node))
-
+    
+    check_prediction = tf.nn.softmax(model(check_data_node), name="check_prediction")
     # Create a local session to run this computation.
-    saver=tf.train.Saver(varlist);
+    saver=tf.train.Saver();
     #Save the graph model
     #tf.train.export_meta_graph(filename='./models/producttype/graph.save', as_text=True)
     with tf.Session() as s:
+    
+        ckpt = tf.train.get_checkpoint_state('./models/producttype/')
+        tf.initialize_all_variables().run()
+        if ckpt and ckpt.model_checkpoint_path:
+            print "find the checkpoing file"
+            saver.restore(s, ckpt.model_checkpoint_path)
+        else:
+            # Run all the initializers to prepare the trainable parameters.
+            tf.initialize_all_variables().run()
         #Save the graph model
         tf.train.write_graph(s.graph_def, '', './models/producttype/graph.pb', as_text=False)
-        # Run all the initializers to prepare the trainable parameters.
-        tf.initialize_all_variables().run()
+
         print 'Initialized!'
         # Loop through training steps.
         for step in xrange(int(num_epochs * train_size / BATCH_SIZE)):
@@ -320,7 +329,10 @@ def main(argv=None):  # pylint: disable=unused-argument
             _, l, lr, predictions = s.run(
                 [optimizer, loss, learning_rate, train_prediction],
                 feed_dict=feed_dict)
-            if step % 100 == 0:
+            if step % 10 == 0:
+                #print s.run(conv1_weights);
+                #print s.run(conv2_weights);
+                
                 saver.save(s,save_path='./models/producttype/train_result')
                 print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
@@ -328,6 +340,9 @@ def main(argv=None):  # pylint: disable=unused-argument
                                                              batch_labels)
                 print 'Validation error: %.1f%%' % error_rate(
                     s.run(validation_prediction, feed_dict = {validation_data_node: validation_data}), validation_labels)
+                print 'Check error: %.1f%%' % error_rate(
+                    s.run(check_prediction, feed_dict = {check_data_node: validation_data[0:1,:,:,:]}), validation_labels[0:1])
+                    
                 sys.stdout.flush()
         saver.save(s,save_path='./models/producttype/train_result')
         # Finally print the result!
