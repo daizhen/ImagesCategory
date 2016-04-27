@@ -25,7 +25,7 @@ PIXEL_DEPTH = 255
 NUM_LABELS = 3
 VALIDATION_SIZE = 200  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
-BATCH_SIZE = 60
+BATCH_SIZE = 100
 NUM_EPOCHS = 10
 
 
@@ -70,7 +70,7 @@ def LoadData(imageDir):
 	#label_list=data_list[,1]
     
     '''shuffle the list '''
-    random.shuffle(data_list)
+    #random.shuffle(data_list)
     print len(data_list)
     
     image_count =20000
@@ -144,8 +144,8 @@ def main(argv=None):  # pylint: disable=unused-argument
         validation_size = int(validation_prop * len(all_data)/100)
         test_size = int(test_prop * len(all_data)/100)
         '''
-        validation_size = 500
-        test_size = 500
+        validation_size = 800
+        test_size = 800
         train_size = len(all_data) - validation_size- test_size
         
         # Extract it into numpy arrays.
@@ -162,7 +162,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         print "train_labels",train_labels.shape
         num_epochs = NUM_EPOCHS
     train_size = train_labels.shape[0]
-
+    print train_size
     # This is where training samples and labels are fed to the graph.
     # These placeholder nodes will be fed a batch of training data at each
     # training step using the {feed_dict} argument to the Run() call below.
@@ -268,16 +268,16 @@ def main(argv=None):  # pylint: disable=unused-argument
     regularizers = (tf.nn.l2_loss(fc1_weights) + tf.nn.l2_loss(fc1_biases) +
                     tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases))
     # Add the regularization term to the loss.
-    loss += 5e-4 * regularizers
+    #loss += 5e-8 * regularizers
 
     # Optimizer: set up a variable that's incremented once per batch and
     # controls the learning rate decay.
     batch = tf.Variable(0)
     # Decay once per epoch, using an exponential schedule starting at 0.01.
     learning_rate = tf.train.exponential_decay(
-        0.01,                # Base learning rate.
+        0.001,                # Base learning rate.
         batch * BATCH_SIZE,  # Current index into the dataset.
-        train_size,          # Decay step.
+        train_size/10,          # Decay step.
         0.95,                # Decay rate.
         staircase=True)
     # Use simple momentum for the optimization.
@@ -320,14 +320,16 @@ def main(argv=None):  # pylint: disable=unused-argument
             _, l, lr, predictions = s.run(
                 [optimizer, loss, learning_rate, train_prediction],
                 feed_dict=feed_dict)
-            if step % 100 == 0:
+            if step %1  == 0:
                 saver.save(s,save_path='./models/producttype/train_result')
                 print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,
                                                              batch_labels)
+                '''                                                         
                 print 'Validation error: %.1f%%' % error_rate(
                     s.run(validation_prediction, feed_dict = {validation_data_node: validation_data}), validation_labels)
+                '''
                 sys.stdout.flush()
         saver.save(s,save_path='./models/producttype/train_result')
         # Finally print the result!
