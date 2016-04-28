@@ -18,6 +18,8 @@ import random
 import math
 from PIL import Image
 
+import util.freeze_graph
+
 WORK_DIRECTORY = 'data'
 IMAGE_SIZE = 100
 NUM_CHANNELS = 1
@@ -25,7 +27,8 @@ PIXEL_DEPTH = 255
 NUM_LABELS = 3
 VALIDATION_SIZE = 200  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
-BATCH_SIZE = 100
+#BATCH_SIZE = 100
+BATCH_SIZE = 50
 NUM_EPOCHS = 10
 
 
@@ -33,7 +36,7 @@ tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
 
 def LoadPossibleLabels():
-    fileName='producttype_name_id_map.csv'
+    fileName='../producttype_name_id_map.csv'
     csvfile = file(fileName, 'rb')
     reader = csv.reader(csvfile)
     index = 0
@@ -52,7 +55,7 @@ def LoadPossibleLabels():
 def LoadData(imageDir):
     
     all_classes = LoadPossibleLabels()
-    fullFileName = 'all_producttype_data.csv'
+    fullFileName = '../all_producttype_data.csv'
     csvfile = file(fullFileName, 'rb')
     reader = csv.reader(csvfile)
     index = 0
@@ -138,7 +141,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         test_data, test_labels = fake_data(256)
         num_epochs = 1
     else:
-        all_data, all_labels = LoadData("data/100_100")
+        all_data, all_labels = LoadData("../data/100_100")
         '''
         train_size = int(train_prop * len(all_data)/100)
         validation_size = int(validation_prop * len(all_data)/100)
@@ -183,10 +186,6 @@ def main(argv=None):  # pylint: disable=unused-argument
     test_data_node = tf.placeholder(
         tf.float32,
         shape=(test_size, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
-        
-    check_data_node = tf.placeholder(
-        tf.float32,
-        shape=(1, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS), name='check_data_node')
 
     # The variables below hold all the trainable weights. They are passed an
     # initial value which will be assigned when when we call:
@@ -260,6 +259,47 @@ def main(argv=None):  # pylint: disable=unused-argument
             hidden = tf.nn.dropout(hidden, 0.5, seed=SEED)
         return tf.matmul(hidden, fc2_weights) + fc2_biases
 
+    def FreezeGraph():
+        model_folder = '../models/producttype/'
+        checkpoint_prefix = os.path.join(model_folder, "saved_checkpoint")
+        checkpoint_state_name = "checkpoint_state"
+        input_graph_name = "input_graph.pb"
+        output_graph_name = "output_graph.pb"
+
+        # We'll create an input graph that has a single variable containing 1.0,
+        # and that then multiplies it by 2.
+        
+        #variable_node = tf.Variable(1.0, name="variable_node")
+        with tf.Graph().as_default():
+            check_data_node = tf.placeholder(tf.float32, shape=(1, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS), name='check_data_node')
+            check_prediction = tf.nn.softmax(model(check_data_node), name="check_prediction")
+            
+            sess = tf.Session()
+            
+            init = tf.initialize_all_variables()
+            sess.run(init)
+            saver = tf.train.Saver()
+            saver.save(sess, checkpoint_prefix, global_step=0,
+                        latest_filename=checkpoint_state_name)
+            tf.train.write_graph(sess.graph.as_graph_def(), model_folder,input_graph_name)
+
+        # We save out the graph to disk, and then call the const conversion
+        # routine.
+        input_graph_path = os.path.join(model_folder, input_graph_name)
+        input_saver_def_path = ""
+        input_binary = False
+        input_checkpoint_path = checkpoint_prefix + "-0"
+        output_node_names = "check_data_node,check_prediction"
+        restore_op_name = "save/restore_all"
+        filename_tensor_name = "save/Const:0"
+        output_graph_path = os.path.join(self.get_temp_dir(), output_graph_name)
+        clear_devices = False
+
+        freeze_graph.freeze_graph(input_graph_path, input_saver_def_path,
+                                input_binary, input_checkpoint_path,
+                                output_node_names, restore_op_name,
+                                filename_tensor_name, output_graph_path,
+                                clear_devices)
     # Training computation: logits + cross-entropy loss.
     logits = model(train_data_node, True)
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
@@ -292,7 +332,6 @@ def main(argv=None):  # pylint: disable=unused-argument
     validation_prediction = tf.nn.softmax(model(validation_data_node))
     test_prediction = tf.nn.softmax(model(test_data_node))
     
-    check_prediction = tf.nn.softmax(model(check_data_node), name="check_prediction")
     # Create a local session to run this computation.
     saver=tf.train.Saver();
     #Save the graph model
@@ -308,7 +347,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             # Run all the initializers to prepare the trainable parameters.
             tf.initialize_all_variables().run()
         #Save the graph model
-        tf.train.write_graph(s.graph_def, '', './models/producttype/graph.pb', as_text=False)
+        tf.train.write_graph(s.graph_def, '', '../models/producttype/graph.pb', as_text=False)
 
         print 'Initialized!'
         # Loop through training steps.
@@ -331,11 +370,12 @@ def main(argv=None):  # pylint: disable=unused-argument
                 [optimizer, loss, learning_rate, train_prediction],
                 feed_dict=feed_dict)
 
-            if step % 10 == 0:
+            if step % 1 == 0:
                 #print s.run(conv1_weights);
                 #print s.run(conv2_weights);
                 
-                saver.save(s,save_path='./models/producttype/train_result')
+                #saver.save(s,save_path='../models/producttype/train_result')
+                FreezeGraph()
                 print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,
@@ -345,7 +385,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                     s.run(validation_prediction, feed_dict = {validation_data_node: validation_data}), validation_labels)
                 '''
                 sys.stdout.flush()
-        saver.save(s,save_path='./models/producttype/train_result')
+        saver.save(s,save_path='../models/producttype/train_result')
         # Finally print the result!
         test_error = error_rate( s.run(test_prediction, feed_dict = {test_data_node: test_data}), test_labels)
         print 'Test error: %.1f%%' % test_error

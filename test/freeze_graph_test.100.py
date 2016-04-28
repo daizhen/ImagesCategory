@@ -37,7 +37,10 @@ class FreezeGraphTest(test_util.TensorFlowTestCase):
 
         # We'll create an input graph that has a single variable containing 1.0,
         # and that then multiplies it by 2.
+        
+        #variable_node = tf.Variable(1.0, name="variable_node")
         with tf.Graph().as_default():
+        
             variable_node = tf.Variable(1.0, name="variable_node")
             output_node = tf.mul(variable_node, 3.0, name="output_node")
             output_node2 = tf.mul(output_node, 4.0, name="output_node2")
