@@ -27,6 +27,9 @@ from tensorflow.python.framework import test_util
 from tensorflow.python.platform import googletest
 import freeze_graph
 import numpy as np
+import sys
+sys.path.append('../src/util/')
+import ModelFreezeUtil;
 
 class FreezeGraphTest(test_util.TensorFlowTestCase):
     def testFreezeGraph(self):
