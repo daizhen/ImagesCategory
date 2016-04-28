@@ -28,7 +28,7 @@ NUM_LABELS = 25
 VALIDATION_SIZE = 200  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 #BATCH_SIZE = 100
-BATCH_SIZE = 50
+BATCH_SIZE = 100
 NUM_EPOCHS = 10
 
 
@@ -302,7 +302,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     regularizers = (tf.nn.l2_loss(fc1_weights) + tf.nn.l2_loss(fc1_biases) +
                     tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases))
     # Add the regularization term to the loss.
-    #loss += 5e-8 * regularizers
+    loss += 5e-8 * regularizers
 
     # Optimizer: set up a variable that's incremented once per batch and
     # controls the learning rate decay.
@@ -311,7 +311,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     learning_rate = tf.train.exponential_decay(
         0.001,                # Base learning rate.
         batch * BATCH_SIZE,  # Current index into the dataset.
-        train_size/10,          # Decay step.
+        train_size,          # Decay step.
         0.95,                # Decay rate.
         staircase=True)
     # Use simple momentum for the optimization.
