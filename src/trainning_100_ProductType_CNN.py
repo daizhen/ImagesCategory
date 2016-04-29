@@ -79,8 +79,8 @@ def LoadData(imageDir):
     random.shuffle(data_list)
     print len(data_list)
     
-    image_count =20000
-    #len(data_list)
+    #image_count =20000
+    image_count = len(data_list)
     image_list = numpy.ndarray( 
         shape=(image_count, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS),
         dtype=numpy.float32)
@@ -204,14 +204,21 @@ def main(argv=None):  # pylint: disable=unused-argument
                             stddev=0.1,
                             seed=SEED), name='conv2_weights')
     conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv2_biases')
-	
-    fc1_weights = tf.Variable(  # fully connected, depth 512.
-        tf.truncated_normal([IMAGE_SIZE / 4 * IMAGE_SIZE / 4 * 64, 512],
+    conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv2_biases')   
+    
+    conv3_weights = tf.Variable(
+        tf.truncated_normal([5, 5, 64, 128],
+                            stddev=0.1,
+                            seed=SEED), name='conv3_weights') 
+    conv3_biases = tf.Variable(tf.constant(0.1, shape=[128]), name='conv3_biases')
+    
+    fc1_weights = tf.Variable(  # fully connected, depth 1024.
+        tf.truncated_normal([IMAGE_SIZE / 4 * IMAGE_SIZE / 4 * 128, 1024],
                             stddev=0.1,
                             seed=SEED), name='fc1_weights')
-    fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]), name='fc1_biases')
+    fc1_biases = tf.Variable(tf.constant(0.1, shape=[1024]), name='fc1_biases')
     fc2_weights = tf.Variable(
-        tf.truncated_normal([512, NUM_LABELS],
+        tf.truncated_normal([1024, NUM_LABELS],
                             stddev=0.1,
                             seed=SEED), name='fc2_weights')
     fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]), name='fc2_biases')
@@ -247,6 +254,16 @@ def main(argv=None):  # pylint: disable=unused-argument
                               ksize=[1, 2, 2, 1],
                               strides=[1, 2, 2, 1],
                               padding='SAME')
+        conv = tf.nn.conv2d(pool,
+                            conv3_weights,
+                            strides=[1, 1, 1, 1],
+                            padding='SAME')
+        relu = tf.nn.relu(tf.nn.bias_add(conv, conv3_biases))
+        pool = tf.nn.max_pool(relu,
+                              ksize=[1, 2, 2, 1],
+                              strides=[1, 2, 2, 1],
+                              padding='SAME')
+                                                            
         # Reshape the feature map cuboid into a 2D matrix to feed it to the
         # fully connected layers.
         pool_shape = pool.get_shape().as_list()
