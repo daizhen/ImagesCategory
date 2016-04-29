@@ -18,14 +18,17 @@ import random
 import math
 from PIL import Image
 
+from util.freeze_graph import freeze_graph
+
 WORK_DIRECTORY = 'data'
 IMAGE_SIZE = 100
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
-NUM_LABELS = 3
+NUM_LABELS = 25
 VALIDATION_SIZE = 200  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
-BATCH_SIZE = 60
+#BATCH_SIZE = 100
+BATCH_SIZE = 100
 NUM_EPOCHS = 10
 
 
@@ -33,7 +36,7 @@ tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
 
 def LoadPossibleLabels():
-    fileName='subcategory_name_id_map.csv'
+    fileName='../subcategory_name_id_map.csv'
     csvfile = file(fileName, 'rb')
     reader = csv.reader(csvfile)
     index = 0
@@ -52,7 +55,10 @@ def LoadPossibleLabels():
 def LoadData(imageDir):
     
     all_classes = LoadPossibleLabels()
-    fullFileName = 'all_subcategory_data.csv'
+    NUM_LABELS = all_classes.shape[0]
+    print NUM_LABELS
+    print all_classes.shape
+    fullFileName = '../all_subcategory_data.csv'
     csvfile = file(fullFileName, 'rb')
     reader = csv.reader(csvfile)
     index = 0
@@ -70,7 +76,7 @@ def LoadData(imageDir):
 	#label_list=data_list[,1]
     
     '''shuffle the list '''
-    random.shuffle(data_list)
+    #random.shuffle(data_list)
     print len(data_list)
     
     image_count =20000
@@ -138,26 +144,24 @@ def main(argv=None):  # pylint: disable=unused-argument
         test_data, test_labels = fake_data(256)
         num_epochs = 1
     else:
-        all_data, all_labels = LoadData("data/100_100")
+        all_data, all_labels = LoadData("../data/100_100")
         '''
         train_size = int(train_prop * len(all_data)/100)
         validation_size = int(validation_prop * len(all_data)/100)
         test_size = int(test_prop * len(all_data)/100)
         '''
-        
-        train_size = len(all_data) - 1000
-        
-        validation_size = 500
-        test_size = 500
-        
+        validation_size = 800
+        test_size = 800
+        train_size = len(all_data) - validation_size- test_size
+
         
         # Extract it into numpy arrays.
-        train_data = all_data[:train_size - 1,:,:,:]
+        train_data = all_data[:train_size,:,:,:]
 
-        train_labels = all_labels[:train_size - 1]
+        train_labels = all_labels[:train_size]
         
-        validation_data = all_data[train_size:train_size+validation_size -1,:,:,:]
-        validation_labels = all_labels[train_size:train_size+validation_size -1]
+        validation_data = all_data[train_size:train_size+validation_size,:,:,:]
+        validation_labels = all_labels[train_size:train_size+validation_size]
         
         test_data = all_data[train_size+validation_size:,:,:,:]
         test_labels = all_labels[train_size+validation_size:]
@@ -165,7 +169,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         print "train_labels",train_labels.shape
         num_epochs = NUM_EPOCHS
     train_size = train_labels.shape[0]
-
+    print train_size
     # This is where training samples and labels are fed to the graph.
     # These placeholder nodes will be fed a batch of training data at each
     # training step using the {feed_dict} argument to the Run() call below.
@@ -176,8 +180,15 @@ def main(argv=None):  # pylint: disable=unused-argument
                                        shape=(BATCH_SIZE, NUM_LABELS))
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
-    validation_data_node = tf.constant(validation_data)
-    test_data_node = tf.constant(test_data)
+    #validation_data_node = tf.constant(validation_data)
+    #test_data_node = tf.constant(test_data)
+    
+    validation_data_node = tf.placeholder(
+        tf.float32,
+        shape=(validation_size, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
+    test_data_node = tf.placeholder(
+        tf.float32,
+        shape=(test_size, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
 
     # The variables below hold all the trainable weights. They are passed an
     # initial value which will be assigned when when we call:
@@ -185,25 +196,28 @@ def main(argv=None):  # pylint: disable=unused-argument
     conv1_weights = tf.Variable(
         tf.truncated_normal([5, 5, NUM_CHANNELS, 32],  # 5x5 filter, depth 32.
                             stddev=0.1,
-                            seed=SEED))
-    conv1_biases = tf.Variable(tf.zeros([32]))
+                            seed=SEED), name='conv1_weights')
+    conv1_biases = tf.Variable(tf.zeros([32]), name='conv1_biases')
 	
     conv2_weights = tf.Variable(
         tf.truncated_normal([5, 5, 32, 64],
                             stddev=0.1,
-                            seed=SEED))
-    conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]))
+                            seed=SEED), name='conv2_weights')
+    conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv2_biases')
 	
     fc1_weights = tf.Variable(  # fully connected, depth 512.
         tf.truncated_normal([IMAGE_SIZE / 4 * IMAGE_SIZE / 4 * 64, 512],
                             stddev=0.1,
-                            seed=SEED))
-    fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]))
+                            seed=SEED), name='fc1_weights')
+    fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]), name='fc1_biases')
     fc2_weights = tf.Variable(
         tf.truncated_normal([512, NUM_LABELS],
                             stddev=0.1,
-                            seed=SEED))
-    fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]))
+                            seed=SEED), name='fc2_weights')
+    fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]), name='fc2_biases')
+    
+    # Var list to save
+    varlist = [conv1_weights,conv1_biases,conv2_weights,conv2_biases,fc1_weights,fc1_biases,fc2_weights,fc2_biases]
 
     # We will replicate the model structure for the training subgraph, as well
     # as the evaluation subgraphs, while sharing the trainable parameters.
@@ -248,6 +262,37 @@ def main(argv=None):  # pylint: disable=unused-argument
             hidden = tf.nn.dropout(hidden, 0.5, seed=SEED)
         return tf.matmul(hidden, fc2_weights) + fc2_biases
 
+    def FreezeGraph(sess):
+        model_folder = '../models/subcategory/'
+        checkpoint_prefix = os.path.join(model_folder, "saved_checkpoint")
+        checkpoint_state_name = "checkpoint_state"
+        input_graph_name = "input_graph.pb"
+        output_graph_name = "output_graph.pb"
+
+        # We'll create an input graph that has a single variable containing 1.0,
+        # and that then multiplies it by 2.
+        saver = tf.train.Saver()
+        saver.save(sess, checkpoint_prefix, global_step=0,
+                        latest_filename=checkpoint_state_name)
+        tf.train.write_graph(sess.graph.as_graph_def(), model_folder,input_graph_name)
+
+        # We save out the graph to disk, and then call the const conversion
+        # routine.
+        input_graph_path = os.path.join(model_folder, input_graph_name)
+        input_saver_def_path = ""
+        input_binary = False
+        input_checkpoint_path = checkpoint_prefix + "-0"
+        output_node_names = "check_data_node,check_prediction"
+        restore_op_name = "save/restore_all"
+        filename_tensor_name = "save/Const:0"
+        output_graph_path = os.path.join(model_folder, output_graph_name)
+        clear_devices = False
+
+        freeze_graph(input_graph_path, input_saver_def_path,
+                                input_binary, input_checkpoint_path,
+                                output_node_names, restore_op_name,
+                                filename_tensor_name, output_graph_path,
+                                clear_devices)
     # Training computation: logits + cross-entropy loss.
     logits = model(train_data_node, True)
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
@@ -257,14 +302,14 @@ def main(argv=None):  # pylint: disable=unused-argument
     regularizers = (tf.nn.l2_loss(fc1_weights) + tf.nn.l2_loss(fc1_biases) +
                     tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases))
     # Add the regularization term to the loss.
-    loss += 5e-4 * regularizers
+    loss += 5e-8 * regularizers
 
     # Optimizer: set up a variable that's incremented once per batch and
     # controls the learning rate decay.
     batch = tf.Variable(0)
     # Decay once per epoch, using an exponential schedule starting at 0.01.
     learning_rate = tf.train.exponential_decay(
-        0.01,                # Base learning rate.
+        0.001,                # Base learning rate.
         batch * BATCH_SIZE,  # Current index into the dataset.
         train_size,          # Decay step.
         0.95,                # Decay rate.
@@ -279,14 +324,26 @@ def main(argv=None):  # pylint: disable=unused-argument
     # We'll compute them only once in a while by calling their {eval()} method.
     validation_prediction = tf.nn.softmax(model(validation_data_node))
     test_prediction = tf.nn.softmax(model(test_data_node))
-
+    
+    check_data_node = tf.placeholder(tf.float32, shape=(1, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS), name='check_data_node')
+    check_prediction = tf.nn.softmax(model(check_data_node), name="check_prediction")
     # Create a local session to run this computation.
     saver=tf.train.Saver();
     #Save the graph model
-    tf.train.export_meta_graph(filename='./models/subcategory/graph.save', as_text=True)
+    #tf.train.export_meta_graph(filename='./models/producttype/graph.save', as_text=True)
     with tf.Session() as s:
-        # Run all the initializers to prepare the trainable parameters.
+    
+        #ckpt = tf.train.get_checkpoint_state('./models/producttype/')
         tf.initialize_all_variables().run()
+        if ckpt and ckpt.model_checkpoint_path:
+            print "find the checkpoing file"
+            saver.restore(s, ckpt.model_checkpoint_path)
+        else:
+            # Run all the initializers to prepare the trainable parameters.
+            tf.initialize_all_variables().run()
+        #Save the graph model
+        #tf.train.write_graph(s.graph_def, '', '../models/producttype/graph.pb', as_text=False)
+
         print 'Initialized!'
         # Loop through training steps.
         for step in xrange(int(num_epochs * train_size / BATCH_SIZE)):
@@ -307,18 +364,25 @@ def main(argv=None):  # pylint: disable=unused-argument
             _, l, lr, predictions = s.run(
                 [optimizer, loss, learning_rate, train_prediction],
                 feed_dict=feed_dict)
-            if step % 100 == 0:
-                saver.save(s,save_path='./models/subcategory/train_result')
+
+            if step % 1 == 0:
+                #print s.run(conv1_weights);
+                #print s.run(conv2_weights);
+                
+                #saver.save(s,save_path='../models/producttype/train_result')
+                
                 print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,
                                                              batch_labels)
+             if step % 100 == 0:                                                       
                 print 'Validation error: %.1f%%' % error_rate(
-                    validation_prediction.eval(), validation_labels)
+                    s.run(validation_prediction, feed_dict = {validation_data_node: validation_data}), validation_labels)
                 sys.stdout.flush()
-        saver.save(s,save_path='./models/subcategory/train_result')
+        FreezeGraph(s)
+        #saver.save(s,save_path='../models/producttype/train_result')
         # Finally print the result!
-        test_error = error_rate(test_prediction.eval(), test_labels)
+        test_error = error_rate( s.run(test_prediction, feed_dict = {test_data_node: test_data}), test_labels)
         print 'Test error: %.1f%%' % test_error
         if FLAGS.self_test:
             print 'test_error', test_error

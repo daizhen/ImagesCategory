@@ -29,7 +29,7 @@ import freeze_graph
 import numpy as np
 import sys
 sys.path.append('../src/util/')
-import ModelFreezeUtil;
+import ImageUtil;
 
 class FreezeGraphTest(test_util.TensorFlowTestCase):
     def testFreezeGraph(self):
@@ -104,10 +104,12 @@ class FreezeGraphTest(test_util.TensorFlowTestCase):
             
                 #add_node = sess.graph.get_tensor_by_name("Add2:0")
                 
-                output1 = sess.run(check_prediction,feed_dict={check_data_node: np.reshape(np.ones(10000),(1,100,100,1))})
+                prediction_result = sess.run(check_prediction,feed_dict={check_data_node: np.reshape(np.ones(10000),(1,100,100,1))})
                 #print(conv1_weights)
                 #output = sess.run(output1)
-                print(output1)
+                print(prediction_result)
+                prediction_index = np.argmax(prediction_result, 1)[0];
+                print(prediction_index)
                 #self.assertNear(2.0, output, 0.00001)
                     
 if __name__ == "__main__":
