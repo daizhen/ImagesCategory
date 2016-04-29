@@ -76,7 +76,7 @@ def LoadData(imageDir):
 	#label_list=data_list[,1]
     
     '''shuffle the list '''
-    #random.shuffle(data_list)
+    random.shuffle(data_list)
     print len(data_list)
     
     image_count =20000
@@ -150,8 +150,8 @@ def main(argv=None):  # pylint: disable=unused-argument
         validation_size = int(validation_prop * len(all_data)/100)
         test_size = int(test_prop * len(all_data)/100)
         '''
-        validation_size = 800
-        test_size = 800
+        validation_size = 500
+        test_size = 500
         train_size = len(all_data) - validation_size- test_size
 
         
@@ -375,10 +375,9 @@ def main(argv=None):  # pylint: disable=unused-argument
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,
                                                              batch_labels)
-                '''                                                         
+            if step % 100 == 0:                                                       
                 print 'Validation error: %.1f%%' % error_rate(
                     s.run(validation_prediction, feed_dict = {validation_data_node: validation_data}), validation_labels)
-                '''
                 sys.stdout.flush()
         FreezeGraph(s)
         #saver.save(s,save_path='../models/producttype/train_result')
