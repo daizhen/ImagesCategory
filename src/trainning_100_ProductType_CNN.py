@@ -213,7 +213,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     conv3_biases = tf.Variable(tf.constant(0.1, shape=[128]), name='conv3_biases')
     
     fc1_weights = tf.Variable(  # fully connected, depth 1024.
-        tf.truncated_normal([IMAGE_SIZE / 4 * IMAGE_SIZE / 4 * 128, 1024],
+        tf.truncated_normal([int(IMAGE_SIZE / 8) * int(IMAGE_SIZE / 8) * 128, 1024],
                             stddev=0.1,
                             seed=SEED), name='fc1_weights')
     fc1_biases = tf.Variable(tf.constant(0.1, shape=[1024]), name='fc1_biases')
@@ -254,6 +254,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                               ksize=[1, 2, 2, 1],
                               strides=[1, 2, 2, 1],
                               padding='SAME')
+        print pool.get_shape().as_list()
         conv = tf.nn.conv2d(pool,
                             conv3_weights,
                             strides=[1, 1, 1, 1],
@@ -262,11 +263,13 @@ def main(argv=None):  # pylint: disable=unused-argument
         pool = tf.nn.max_pool(relu,
                               ksize=[1, 2, 2, 1],
                               strides=[1, 2, 2, 1],
-                              padding='SAME')
+                              padding='VALID')
                                                             
         # Reshape the feature map cuboid into a 2D matrix to feed it to the
         # fully connected layers.
         pool_shape = pool.get_shape().as_list()
+        print pool_shape
+        print fc1_weights.get_shape().as_list()
         reshape = tf.reshape(
             pool,
             [pool_shape[0], pool_shape[1] * pool_shape[2] * pool_shape[3]])
