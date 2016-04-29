@@ -1,26 +1,112 @@
 name,id
-application,0
-hp cloud,1
-pc hardware,2
-network,3
-gbs application,4
-database - other,5
-infrastructure,6
-app. infrastructure,7
-voice,8
-print,9
-shared lab services,10
-monitoring,11
-database - oracle,12
-database - mssql,13
-authentication,14
-active directory,15
-pc accessories,16
-pc software,17
-file share - messaging - collaboration,18
-change management,19
-remote connectivity-hp,20
-database,21
-facilities,22
-database - neo,23
-pc setup - migration - backup - recovery,24
+functionality,0
+user access issue,1
+data quality,2
+hp cloud,3
+fixed care pack,4
+functional help,5
+pc lifecycle,6
+voice,7
+enterprise services,8
+database,9
+server,10
+partner request,11
+dde,12
+vodafone,13
+mobility hardware,14
+orders & contracts,15
+compass,16
+contact centre,17
+performance,18
+end user print,19
+unified communications,20
+sap,21
+lab,22
+general,23
+job monitoring,24
+back-office telephony,25
+verizon,26
+csm,27
+NULL,28
+telcel,29
+vivo,30
+csa,31
+configuration,32
+voice-over-ip,33
+cloud service access,34
+consultation,35
+movistar,36
+bell mobility paging,37
+firewall,38
+dash,39
+external access and security,40
+infrastructure application,41
+set-up,42
+tokens,43
+globe,44
+backup,45
+user access governance,46
+dns,47
+storage,48
+lan,49
+etools,50
+data content,51
+at&t,52
+lab network,53
+application,54
+wan,55
+dedicated web hosting,56
+database availability,57
+telstra,58
+,59
+mobility,60
+business apps,61
+password reset,62
+siteminder,63
+partner support,64
+pc malware,65
+shared processing,66
+collaboration,67
+repair order processing,68
+skytel/american messaging,69
+digitalbadge,70
+email,71
+singtel,72
+windows os,73
+infra consulting,74
+flexible care pack,75
+pc encryption,76
+shared web hosting,77
+rogers,78
+it accessories,79
+ccm,80
+standard software list,81
+remote access to hp-vpn,82
+private network,83
+vmware,84
+sanswitch,85
+file system,86
+onsite,87
+business intelligence reporting,88
+ucmdb,89
+ntt docomo,90
+pc hardware,91
+sprint,92
+file services,93
+vsm,94
+olleh,95
+sfs,96
+team support,97
+technology solutions (tsdo),98
+usa mobility/arch/metrocall,99
+production infrastructure,100
+f5-load balancer (llb),101
+enterprise print,102
+pc backup - recovery,103
+bell,104
+site services,105
+self-service set-up,106
+pc coe,107
+general accounting (gao),108
+proxy,109
+self-submitted,110

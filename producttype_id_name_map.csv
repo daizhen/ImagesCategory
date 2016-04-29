@@ -1,26 +1,112 @@
 id,name
-0,application
-1,hp cloud
-2,pc hardware
-3,network
-4,gbs application
-5,database - other
-6,infrastructure
-7,app. infrastructure
-8,voice
-9,print
-10,shared lab services
-11,monitoring
-12,database - oracle
-13,database - mssql
-14,authentication
-15,active directory
-16,pc accessories
-17,pc software
-18,file share - messaging - collaboration
-19,change management
-20,remote connectivity-hp
-21,database
-22,facilities
-23,database - neo
-24,pc setup - migration - backup - recovery
+0,functionality
+1,user access issue
+2,data quality
+3,hp cloud
+4,fixed care pack
+5,functional help
+6,pc lifecycle
+7,voice
+8,enterprise services
+9,database
+10,server
+11,partner request
+12,dde
+13,vodafone
+14,mobility hardware
+15,orders & contracts
+16,compass
+17,contact centre
+18,performance
+19,end user print
+20,unified communications
+21,sap
+22,lab
+23,general
+24,job monitoring
+25,back-office telephony
+26,verizon
+27,csm
+28,NULL
+29,telcel
+30,vivo
+31,csa
+32,configuration
+33,voice-over-ip
+34,cloud service access
+35,consultation
+36,movistar
+37,bell mobility paging
+38,firewall
+39,dash
+40,external access and security
+41,infrastructure application
+42,set-up
+43,tokens
+44,globe
+45,backup
+46,user access governance
+47,dns
+48,storage
+49,lan
+50,etools
+51,data content
+52,at&t
+53,lab network
+54,application
+55,wan
+56,dedicated web hosting
+57,database availability
+58,telstra
+59,
+60,mobility
+61,business apps
+62,password reset
+63,siteminder
+64,partner support
+65,pc malware
+66,shared processing
+67,collaboration
+68,repair order processing
+69,skytel/american messaging
+70,digitalbadge
+71,email
+72,singtel
+73,windows os
+74,infra consulting
+75,flexible care pack
+76,pc encryption
+77,shared web hosting
+78,rogers
+79,it accessories
+80,ccm
+81,standard software list
+82,remote access to hp-vpn
+83,private network
+84,vmware
+85,sanswitch
+86,file system
+87,onsite
+88,business intelligence reporting
+89,ucmdb
+90,ntt docomo
+91,pc hardware
+92,sprint
+93,file services
+94,vsm
+95,olleh
+96,sfs
+97,team support
+98,technology solutions (tsdo)
+99,usa mobility/arch/metrocall
+100,production infrastructure
+101,f5-load balancer (llb)
+102,enterprise print
+103,pc backup - recovery
+104,bell
+105,site services
+106,self-service set-up
+107,pc coe
+108,general accounting (gao)
+109,proxy
+110,self-submitted
