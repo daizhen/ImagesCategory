@@ -104,7 +104,12 @@ class FreezeGraphTest(test_util.TensorFlowTestCase):
             
                 #add_node = sess.graph.get_tensor_by_name("Add2:0")
                 
-                prediction_result = sess.run(check_prediction,feed_dict={check_data_node: np.reshape(np.ones(10000),(1,100,100,1))})
+                imageData = ImageUtil.PreprocessImage('../data/gray_images/sd219845585erroram06002627.jpeg',(100,100))
+                imageArray = ImageUtil.ReadImageToArray(imageData)
+                
+                print(imageArray)
+                #sd21793612request charm.jpeg
+                prediction_result = sess.run(check_prediction,feed_dict={check_data_node: np.reshape(imageArray,(1,100,100,1))})
                 #print(conv1_weights)
                 #output = sess.run(output1)
                 print(prediction_result)

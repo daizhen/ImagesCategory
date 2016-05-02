@@ -12,4 +12,4 @@ def ResizeImages(in_dir, out_dir,size):
 
 if __name__ == "__main__":  
     #ResizeImages("../sample_data/gray_images","../sample_data/100_100",(100,100))
-    ResizeImages("../data/gray_images","../data/100_100",(100,100))   
+    ResizeImages("../../data/gray_images","../../data/200_200",(200,200))   

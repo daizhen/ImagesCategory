@@ -21,10 +21,10 @@ from PIL import Image
 from util.freeze_graph import freeze_graph
 
 WORK_DIRECTORY = 'data'
-IMAGE_SIZE = 100
+IMAGE_SIZE = 200
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
-NUM_LABELS = 111
+NUM_LABELS = 294
 VALIDATION_SIZE = 200  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 #BATCH_SIZE = 100
@@ -36,7 +36,7 @@ tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
 
 def LoadPossibleLabels():
-    fileName='../producttype_name_id_map.csv'
+    fileName='../product_name_id_map.csv'
     csvfile = file(fileName, 'rb')
     reader = csv.reader(csvfile)
     index = 0
@@ -58,7 +58,7 @@ def LoadData(imageDir):
     NUM_LABELS = all_classes.shape[0]
     print NUM_LABELS
     print all_classes.shape
-    fullFileName = '../all_producttype_data.csv'
+    fullFileName = '../all_product_data.csv'
     csvfile = file(fullFileName, 'rb')
     reader = csv.reader(csvfile)
     index = 0
@@ -144,7 +144,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         test_data, test_labels = fake_data(256)
         num_epochs = 1
     else:
-        all_data, all_labels = LoadData("../data/100_100")
+        all_data, all_labels = LoadData("../data/200_200")
         '''
         train_size = int(train_prop * len(all_data)/100)
         validation_size = int(validation_prop * len(all_data)/100)
@@ -283,7 +283,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         return tf.matmul(hidden, fc2_weights) + fc2_biases
 
     def FreezeGraph(sess):
-        model_folder = '../models/producttype/'
+        model_folder = '../models/product/'
         checkpoint_prefix = os.path.join(model_folder, "saved_checkpoint")
         checkpoint_state_name = "checkpoint_state"
         input_graph_name = "input_graph.pb"
@@ -353,7 +353,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     #tf.train.export_meta_graph(filename='./models/producttype/graph.save', as_text=True)
     with tf.Session() as s:
     
-        ckpt = tf.train.get_checkpoint_state('./models/producttype/')
+        ckpt = tf.train.get_checkpoint_state('./models/product/')
         tf.initialize_all_variables().run()
         if ckpt and ckpt.model_checkpoint_path:
             print "find the checkpoing file"
@@ -362,7 +362,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             # Run all the initializers to prepare the trainable parameters.
             tf.initialize_all_variables().run()
         #Save the graph model
-        tf.train.write_graph(s.graph_def, '', '../models/producttype/graph.pb', as_text=False)
+        tf.train.write_graph(s.graph_def, '', '../models/product/graph.pb', as_text=False)
 
         print 'Initialized!'
         # Loop through training steps.

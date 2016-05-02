@@ -10,9 +10,10 @@ def LoadImage(imagePath):
 '''
 Read Fixed size (pre-processed) image into array.
 '''
-def ReadImageToArray(image, width, height):
+def ReadImageToArray(image):
     #image = Image.open(imagePath)
     array = np.array(image)
+    array = (array - (255 / 2.0)) / 255
     return array;
 
 def PreprocessImage(imagePath,resultSize):
