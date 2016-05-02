@@ -76,11 +76,11 @@ def LoadData(imageDir):
 	#label_list=data_list[,1]
     
     '''shuffle the list '''
-    #random.shuffle(data_list)
+    random.shuffle(data_list)
     print len(data_list)
     
-    image_count =20000
-    #len(data_list)
+    #image_count =20000
+    image_count = len(data_list)
     image_list = numpy.ndarray( 
         shape=(image_count, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS),
         dtype=numpy.float32)
@@ -150,8 +150,8 @@ def main(argv=None):  # pylint: disable=unused-argument
         validation_size = int(validation_prop * len(all_data)/100)
         test_size = int(test_prop * len(all_data)/100)
         '''
-        validation_size = 800
-        test_size = 800
+        validation_size = 500
+        test_size = 500
         train_size = len(all_data) - validation_size- test_size
 
         
@@ -204,14 +204,21 @@ def main(argv=None):  # pylint: disable=unused-argument
                             stddev=0.1,
                             seed=SEED), name='conv2_weights')
     conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv2_biases')
-	
-    fc1_weights = tf.Variable(  # fully connected, depth 512.
-        tf.truncated_normal([IMAGE_SIZE / 4 * IMAGE_SIZE / 4 * 64, 512],
+    conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv2_biases')   
+    
+    conv3_weights = tf.Variable(
+        tf.truncated_normal([5, 5, 64, 128],
+                            stddev=0.1,
+                            seed=SEED), name='conv3_weights') 
+    conv3_biases = tf.Variable(tf.constant(0.1, shape=[128]), name='conv3_biases')
+    
+    fc1_weights = tf.Variable(  # fully connected, depth 1024.
+        tf.truncated_normal([int(IMAGE_SIZE / 8) * int(IMAGE_SIZE / 8) * 128, 1024],
                             stddev=0.1,
                             seed=SEED), name='fc1_weights')
-    fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]), name='fc1_biases')
+    fc1_biases = tf.Variable(tf.constant(0.1, shape=[1024]), name='fc1_biases')
     fc2_weights = tf.Variable(
-        tf.truncated_normal([512, NUM_LABELS],
+        tf.truncated_normal([1024, NUM_LABELS],
                             stddev=0.1,
                             seed=SEED), name='fc2_weights')
     fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]), name='fc2_biases')
@@ -247,9 +254,22 @@ def main(argv=None):  # pylint: disable=unused-argument
                               ksize=[1, 2, 2, 1],
                               strides=[1, 2, 2, 1],
                               padding='SAME')
+        print pool.get_shape().as_list()
+        conv = tf.nn.conv2d(pool,
+                            conv3_weights,
+                            strides=[1, 1, 1, 1],
+                            padding='SAME')
+        relu = tf.nn.relu(tf.nn.bias_add(conv, conv3_biases))
+        pool = tf.nn.max_pool(relu,
+                              ksize=[1, 2, 2, 1],
+                              strides=[1, 2, 2, 1],
+                              padding='VALID')
+                                                            
         # Reshape the feature map cuboid into a 2D matrix to feed it to the
         # fully connected layers.
         pool_shape = pool.get_shape().as_list()
+        print pool_shape
+        print fc1_weights.get_shape().as_list()
         reshape = tf.reshape(
             pool,
             [pool_shape[0], pool_shape[1] * pool_shape[2] * pool_shape[3]])
@@ -333,7 +353,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     #tf.train.export_meta_graph(filename='./models/producttype/graph.save', as_text=True)
     with tf.Session() as s:
     
-        #ckpt = tf.train.get_checkpoint_state('./models/producttype/')
+        ckpt = tf.train.get_checkpoint_state('./models/subcategory/')
         tf.initialize_all_variables().run()
         if ckpt and ckpt.model_checkpoint_path:
             print "find the checkpoing file"
@@ -342,7 +362,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             # Run all the initializers to prepare the trainable parameters.
             tf.initialize_all_variables().run()
         #Save the graph model
-        #tf.train.write_graph(s.graph_def, '', '../models/producttype/graph.pb', as_text=False)
+        tf.train.write_graph(s.graph_def, '', '../models/subcategory/graph.pb', as_text=False)
 
         print 'Initialized!'
         # Loop through training steps.
@@ -375,7 +395,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,
                                                              batch_labels)
-             if step % 100 == 0:                                                       
+            if step % 100 == 0:                                                       
                 print 'Validation error: %.1f%%' % error_rate(
                     s.run(validation_prediction, feed_dict = {validation_data_node: validation_data}), validation_labels)
                 sys.stdout.flush()
