@@ -55,10 +55,10 @@ def Process_OCR(in_dir):
                 result = client.post_request(params, HODApps.OCR_DOCUMENT, async=False)
                 #print result['text_block']
                 #Update progress
+                StoreResult(imageFileName,result['text_block'])
                 progressDict[imageFileName] = True;
                 UpdateProgress(imageFileName)
-                StoreResult(imageFileName,result['text_block'])
-        except UnicodeDecodeError:
+        except  Exception as e:
             print imageFileName
             
 if __name__ == "__main__":  
