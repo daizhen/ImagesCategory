@@ -63,7 +63,9 @@ def Process_OCR(in_dir):
             
 if __name__ == "__main__":  
     #ResizeImages("../sample_data/gray_images","../sample_data/100_100",(100,100))
-    Process_OCR("../../data/gray_images")
+    #Process_OCR("../../data/gray_images")
+    Process_OCR("/media/sf_VM_Share/jpg_images")
+    
     '''
     progress = LoadProgress()
     print progress
