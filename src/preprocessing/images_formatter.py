@@ -23,4 +23,4 @@ def convert_to_jpg(in_dir,out_dir):
 				open(out_full_name, "wb").write(open(in_full_name, "rb").read())
 			else:
 				print current_file
-convert_to_jpg('../data/original_images','../data/jpg_images')
+convert_to_jpg('../../data/original_images','../../data/jpg_images')

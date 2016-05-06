@@ -18,4 +18,4 @@ def ConvertToGray(in_dir,out_dir):
                 print in_file
 
 #ConvertToGray("../sample_data/original_images","../sample_data/gray_images")
-ConvertToGray("../data/jpg_images","../data/gray_images")
+ConvertToGray("../../data/jpg_images","../../data/gray_images")
