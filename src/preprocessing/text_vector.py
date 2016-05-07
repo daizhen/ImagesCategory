@@ -24,7 +24,7 @@ def CreateTextVector():
             #print wordList
             #print len(wordList)
             for currentWord in wordList:
-                wordStem = stemmer.stem(currentWord)
+                wordStem = currentWord
                 #Remove numbers begein and end of the wordDict
                 startNumberMatch =  regStartNumber.match(wordStem)
                 if startNumberMatch != None:
@@ -32,6 +32,7 @@ def CreateTextVector():
                 endNumberMatch = re.search('\\d+$',wordStem)
                 if endNumberMatch != None:
                     wordStem = wordStem[:endNumberMatch.span()[0]]
+                wordStem = stemmer.stem(wordStem)
                 if len(wordStem) >2 :
                     if wordStem in wordDict:
                         wordDict[wordStem] = wordDict[wordStem] + 1
@@ -43,6 +44,11 @@ def CreateTextVector():
     keys = [item[0] for item in sortedList if item[1]>2]
     #print len(keys)
     print keys
+    
+    # Write the keys to csv file
+    allTokenFileName = '../../data/all_tokens.csv'
+    
+    
 if __name__ == "__main__":  
     #ResizeImages("../sample_data/gray_images","../sample_data/100_100",(100,100))
     #Process_OCR("../../data/gray_images")
