@@ -2,7 +2,7 @@ import sys
 import csv
 
 def WriteCSV(fileName,data):
-    csvfile = file(file, 'wb')
+    csvfile = file(fileName, 'wb')
     writer = csv.writer(csvfile)
     writer.writerows(data)
     csvfile.close()

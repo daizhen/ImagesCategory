@@ -5,6 +5,9 @@ import numpy as np
 import re
 from nltk import SnowballStemmer
 
+sys.path.append('../util/')
+import CSVUtil;
+
 def CreateTextVector():
     fileName='ocr_result _1.csv'
     wordDict = {};
@@ -41,13 +44,12 @@ def CreateTextVector():
             #break;
     csvfile.close()
     sortedList = sorted(wordDict.iteritems(), key=lambda d:d[1], reverse = False)
-    keys = [item[0] for item in sortedList if item[1]>2]
-    #print len(keys)
-    print keys
+    keys = [[item[0]] for item in sortedList if item[1]>2]
+    print len(keys)
+    #print keys
     
     # Write the keys to csv file
-    allTokenFileName = '../../data/all_tokens.csv'
-    
+    CSVUtil.WriteCSV('../../data/all_tokens.csv',keys)
     
 if __name__ == "__main__":  
     #ResizeImages("../sample_data/gray_images","../sample_data/100_100",(100,100))
