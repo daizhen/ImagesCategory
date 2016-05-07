@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import re
 from nltk import SnowballStemmer
+import CSVUtil
 
 regEx = re.compile('\\W*')
 regNumber = re.compile('^\\d+$')
@@ -27,12 +28,18 @@ def GetTokenList(text):
         wordStem = stemmer.stem(wordStem)
         if len(wordStem) >2 :
             wordDict[wordStem] = 1
-    return wordDict.kes()
+    return wordDict.keys()
 
 def GetAllTokenDict(fileName):
-    pass
-def GetTextVector(tokenList, allTokenDict):
+    #'../../data/all_tokens.csv'
+    tokenList = CSVUtil.ReadCSV(fileName)
+    tokenDict = {}
+    for token in tokenList:
+        tokenDict[token[0]] = -0.5
+    #print tokenDict
+    return tokenDict
     
+def GetTextVector(tokenList, allTokenDict):
     #Init all value to -0.5
     for key in allTokenDict.keys():
         allTokenDict[key] = -0.5
@@ -41,5 +48,8 @@ def GetTextVector(tokenList, allTokenDict):
         if token in allTokenDict:
             allTokenDict[token] = 0.5  
     return [allTokenDict[key] for key in allTokenDict.keys()]
-     
-      
+
+'''     
+if __name__ == "__main__":
+    GetAllTokenDict('../../data/all_tokens.csv')
+'''

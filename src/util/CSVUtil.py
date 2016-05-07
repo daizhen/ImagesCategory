@@ -11,5 +11,5 @@ def ReadCSV(fileName):
     csvfile = file(fileName, 'rb')
     reader = csv.reader(csvfile)
     content = [item for item in reader]
-    reader.close()
+    #reader.close()
     return content;
