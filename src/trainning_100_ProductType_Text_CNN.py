@@ -41,10 +41,10 @@ def LoadPossibleLabels():
     return numpy.array(label_list)
 
 def LoadData(imageDir):
-    
+    global NUM_LABELS
     all_classes = LoadPossibleLabels()
     NUM_LABELS = all_classes.shape[0]
-    print NUM_LABELS
+    
     print all_classes.shape
     fullFileName = '../all_producttype_data.csv'
     csvfile = file(fullFileName, 'rb')
