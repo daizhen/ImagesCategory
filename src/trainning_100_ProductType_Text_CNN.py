@@ -11,6 +11,9 @@ from PIL import Image
 
 from util.freeze_graph import freeze_graph
 
+import util.DataUtil as DataUtil
+import util.TextVectorUtil as TextVectorUtil
+
 IMAGE_SIZE = 100
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
@@ -24,90 +27,6 @@ NUM_EPOCHS = 10
 tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
 
-def LoadPossibleLabels():
-    fileName='../producttype_name_id_map.csv'
-    csvfile = file(fileName, 'rb')
-    reader = csv.reader(csvfile)
-    index = 0
-	
-    label_list = list()
-    for line in reader:
-        if index != 0:
-            currentLabel = line[0]
-            if not currentLabel in label_list:
-                label_list.append(currentLabel);
-        index +=1
-    csvfile.close()
-    return numpy.array(label_list)
-
-def LoadData(imageDir):
-    global NUM_LABELS
-    all_classes = LoadPossibleLabels()
-    NUM_LABELS = all_classes.shape[0]
-    
-    print all_classes.shape
-    fullFileName = '../all_producttype_data.csv'
-    csvfile = file(fullFileName, 'rb')
-    reader = csv.reader(csvfile)
-    index = 0
-	
-    data_list = list()
-    for line in reader:
-        if index != 0:
-            fullImageFile = os.path.join(imageDir,line[0])
-            if(os.path.exists(fullImageFile)):
-                data_list.append(line);
-                #print line[0]
-        index +=1
-    csvfile.close()
-	
-	#label_list=data_list[,1]
-    
-    '''shuffle the list '''
-    random.shuffle(data_list)
-    print len(data_list)
-    
-    #image_count =20000
-    image_count = len(data_list)
-    image_list = numpy.ndarray( 
-        shape=(image_count, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS),
-        dtype=numpy.float32)
-        
-    label_list = numpy.ndarray(shape=[image_count], dtype=numpy.float32)
-    label_list_result = numpy.ndarray(shape=(image_count, NUM_LABELS), dtype=numpy.float32)
-    
-    for index in range(image_count):
-        dataItem = data_list[index]
-
-        image = Image.open(os.path.join(imageDir,dataItem[0]))   # image is a PIL image 
-        array = numpy.array(image)        # array is a numpy array
-        image_list[index,:,:,:] = numpy.reshape(array,(IMAGE_SIZE,IMAGE_SIZE,NUM_CHANNELS));
-        
-        try:
-        
-            label_list[index] = numpy.where(all_classes == dataItem[1])[0][0]
-        except:
-            print "error:",  dataItem
-    print 'here'
-    label_list_result = (numpy.arange(NUM_LABELS) == label_list[:, None]).astype(numpy.float32)
-    image_list = (image_list - (PIXEL_DEPTH / 2.0)) / PIXEL_DEPTH
-    #print image_list
-    #print label_list_result
-    return image_list,label_list_result
-    
-def fake_data(num_images):
-    """Generate a fake dataset that matches the dimensions of MNIST."""
-    data = numpy.ndarray(
-        shape=(num_images, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS),
-        dtype=numpy.float32)
-    labels = numpy.zeros(shape=(num_images, NUM_LABELS), dtype=numpy.float32)
-    for image in xrange(num_images):
-        label = image % 2
-        data[image, :, :, 0] = label - 0.5
-        labels[image, label] = 1.0
-    return data, labels
-
-
 def error_rate(predictions, labels):
     """Return the error rate based on dense predictions and 1-hot labels."""
     return 100.0 - (
@@ -118,71 +37,61 @@ def error_rate(predictions, labels):
 
 def main(argv=None):  # pylint: disable=unused-argument
     
-    # 70 persent for Train
-    train_prop = 70
-    # 20 persent for validation
-    validation_prop = 20
-    # 10 persent for test
-    test_prop = 10
+    imageInfo={'WIDTH':100,'HEIGHT':100,'CHANNELS':1}
     
-    if FLAGS.self_test:
-        print 'Running self-test.'
-        train_data, train_labels = fake_data(256)
-        validation_data, validation_labels = fake_data(16)
-        test_data, test_labels = fake_data(256)
-        num_epochs = 1
-    else:
-        all_data, all_labels = LoadData("../data/100_100")
-        '''
-        train_size = int(train_prop * len(all_data)/100)
-        validation_size = int(validation_prop * len(all_data)/100)
-        test_size = int(test_prop * len(all_data)/100)
-        '''
-        validation_size = 500
-        test_size = 500
-        train_size = len(all_data) - validation_size- test_size
+    train_data, train_tokens_list,train_labels = DataUtil.LoadProductTypeData('../data/trainning_data.csv','../producttype_name_id_map.csv','../data/100_100',imageInfo)
+    validation_data, validation_tokens_list,validation_labels = DataUtil.LoadProductTypeData('../data/validation_data.csv','../producttype_name_id_map.csv','../data/100_100',imageInfo)
+    test_data, test_tokens_list,test_labels = DataUtil.LoadProductTypeData('../data/test_data.csv','../producttype_name_id_map.csv','../data/100_100',imageInfo)
+    
+    validation_size = validation_data.shape[0]
+    test_size = test_data.shape[0]
+    train_size = train_data.shape[0]
 
-        
-        # Extract it into numpy arrays.
-        train_data = all_data[:train_size,:,:,:]
-
-        train_labels = all_labels[:train_size]
-        
-        validation_data = all_data[train_size:train_size+validation_size,:,:,:]
-        validation_labels = all_labels[train_size:train_size+validation_size]
-        
-        test_data = all_data[train_size+validation_size:,:,:,:]
-        test_labels = all_labels[train_size+validation_size:]
-        
-        print "train_labels",train_labels.shape
-        num_epochs = NUM_EPOCHS
-    train_size = train_labels.shape[0]
-    print train_size
+    print "train_labels",train_labels.shape
+    
+    tokenDict = TextVectorUtil.GetAllTokenDict('../../data/all_trainning_tokens.csv')
+    
+    tokenCount = len(tokenDict)
+    
+    labelCount = train_labels.shape[1]
+    
+    num_epochs = NUM_EPOCHS
+   
     # This is where training samples and labels are fed to the graph.
     # These placeholder nodes will be fed a batch of training data at each
     # training step using the {feed_dict} argument to the Run() call below.
     train_data_node = tf.placeholder(
         tf.float32,
-        shape=(BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
-    train_labels_node = tf.placeholder(tf.float32,
-                                       shape=(BATCH_SIZE, NUM_LABELS))
+        shape=(BATCH_SIZE, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
+    train_text_node = tf.placeholder(
+        tf.float32,
+        shape=(BATCH_SIZE, tokenCount))
+    
+    train_labels_node = tf.placeholder(tf.float32, shape=(BATCH_SIZE, labelCount))
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
     #validation_data_node = tf.constant(validation_data)
     #test_data_node = tf.constant(test_data)
     
-    validation_data_node = tf.placeholder(
+    validation_data_node = tf.placeholder(tf.float32,shape=(validation_size, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
+    validation_text_node = tf.placeholder(
         tf.float32,
-        shape=(validation_size, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
-    test_data_node = tf.placeholder(
+        shape=(validation_size, tokenCount))
+        
+    test_data_node = tf.placeholder(tf.float32,shape=(test_size, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
+    
+    test_text_node = tf.placeholder(
         tf.float32,
-        shape=(test_size, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
-
+        shape=(test_size, tokenCount))
+        
+    check_data_node = tf.placeholder(tf.float32, shape=(1, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS), name='check_data_node')
+    check_text_node = tf.placeholder(tf.float32,shape=(1, tokenCount))
+    
     # The variables below hold all the trainable weights. They are passed an
     # initial value which will be assigned when when we call:
     # {tf.initialize_all_variables().run()}
     conv1_weights = tf.Variable(
-        tf.truncated_normal([5, 5, NUM_CHANNELS, 32],  # 5x5 filter, depth 32.
+        tf.truncated_normal([5, 5, imageInfo['CHANNELS'], 32],  # 5x5 filter, depth 32.
                             stddev=0.1,
                             seed=SEED), name='conv1_weights')
     conv1_biases = tf.Variable(tf.zeros([32]), name='conv1_biases')
@@ -201,22 +110,22 @@ def main(argv=None):  # pylint: disable=unused-argument
     conv3_biases = tf.Variable(tf.constant(0.1, shape=[128]), name='conv3_biases')
     
     fc1_weights = tf.Variable(  # fully connected, depth 1024.
-        tf.truncated_normal([int(IMAGE_SIZE / 8) * int(IMAGE_SIZE / 8) * 128, 1024],
+        tf.truncated_normal([int(imageInfo['WIDTH'] / 8) * int(imageInfo['HEIGHT'] / 8) * 128 + tokenCount, 1024],
                             stddev=0.1,
                             seed=SEED), name='fc1_weights')
     fc1_biases = tf.Variable(tf.constant(0.1, shape=[1024]), name='fc1_biases')
     fc2_weights = tf.Variable(
-        tf.truncated_normal([1024, NUM_LABELS],
+        tf.truncated_normal([1024, labelCount],
                             stddev=0.1,
                             seed=SEED), name='fc2_weights')
-    fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]), name='fc2_biases')
+    fc2_biases = tf.Variable(tf.constant(0.1, shape=[labelCount]), name='fc2_biases')
     
     # Var list to save
-    varlist = [conv1_weights,conv1_biases,conv2_weights,conv2_biases,fc1_weights,fc1_biases,fc2_weights,fc2_biases]
+    #varlist = [conv1_weights,conv1_biases,conv2_weights,conv2_biases,fc1_weights,fc1_biases,fc2_weights,fc2_biases]
 
     # We will replicate the model structure for the training subgraph, as well
     # as the evaluation subgraphs, while sharing the trainable parameters.
-    def model(data, train=False):
+    def model(data,text_data, train=False):
         """The Model definition."""
         # 2D convolution, with 'SAME' padding (i.e. the output feature map has
         # the same size as the input). Note that {strides} is a 4D array whose
@@ -261,6 +170,10 @@ def main(argv=None):  # pylint: disable=unused-argument
         reshape = tf.reshape(
             pool,
             [pool_shape[0], pool_shape[1] * pool_shape[2] * pool_shape[3]])
+        #Add text vector into account before fully connected layer
+        
+        reshape = tf.concat(1,[reshape,text_data])
+        
         # Fully connected layer. Note that the '+' operation automatically
         # broadcasts the biases.
         hidden = tf.nn.relu(tf.matmul(reshape, fc1_weights) + fc1_biases)
@@ -302,7 +215,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                                 filename_tensor_name, output_graph_path,
                                 clear_devices)
     # Training computation: logits + cross-entropy loss.
-    logits = model(train_data_node, True)
+    logits = model(train_data_node,train_text_node, True)
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
         logits, train_labels_node))
 
@@ -330,18 +243,17 @@ def main(argv=None):  # pylint: disable=unused-argument
     # Predictions for the minibatch, validation set and test set.
     train_prediction = tf.nn.softmax(logits)
     # We'll compute them only once in a while by calling their {eval()} method.
-    validation_prediction = tf.nn.softmax(model(validation_data_node))
-    test_prediction = tf.nn.softmax(model(test_data_node))
+    validation_prediction = tf.nn.softmax(model(validation_data_node,validation_text_node))
+    test_prediction = tf.nn.softmax(model(test_data_node,test_text_node))
     
-    check_data_node = tf.placeholder(tf.float32, shape=(1, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS), name='check_data_node')
-    check_prediction = tf.nn.softmax(model(check_data_node), name="check_prediction")
+    check_prediction = tf.nn.softmax(model(check_data_node,check_text_node), name="check_prediction")
     # Create a local session to run this computation.
     saver=tf.train.Saver();
     #Save the graph model
     #tf.train.export_meta_graph(filename='./models/producttype/graph.save', as_text=True)
     with tf.Session() as s:
     
-        ckpt = tf.train.get_checkpoint_state('./models/producttype/')
+        ckpt = tf.train.get_checkpoint_state('./models/producttype/with_text/')
         tf.initialize_all_variables().run()
         if ckpt and ckpt.model_checkpoint_path:
             print "find the checkpoing file"
@@ -350,7 +262,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             # Run all the initializers to prepare the trainable parameters.
             tf.initialize_all_variables().run()
         #Save the graph model
-        tf.train.write_graph(s.graph_def, '', '../models/producttype/graph.pb', as_text=False)
+        tf.train.write_graph(s.graph_def, '', '../models/producttype/with_text/graph.pb', as_text=False)
 
         print 'Initialized!'
         # Loop through training steps.
@@ -359,6 +271,8 @@ def main(argv=None):  # pylint: disable=unused-argument
             # Note that we could use better randomization across epochs.
             offset = (step * BATCH_SIZE) % (train_size - BATCH_SIZE)
             batch_data = train_data[offset:(offset + BATCH_SIZE), :, :, :]
+            batch_text_data = train_tokens_list[offset:(offset + BATCH_SIZE)]
+            
             batch_labels = train_labels[offset:(offset + BATCH_SIZE)]
             # This dictionary maps the batch data (as a numpy array) to the
             # node in the graph is should be fed to.
