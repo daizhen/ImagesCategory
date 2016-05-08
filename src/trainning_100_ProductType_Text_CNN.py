@@ -272,12 +272,13 @@ def main(argv=None):  # pylint: disable=unused-argument
             offset = (step * BATCH_SIZE) % (train_size - BATCH_SIZE)
             batch_data = train_data[offset:(offset + BATCH_SIZE), :, :, :]
             batch_text_data = train_tokens_list[offset:(offset + BATCH_SIZE)]
-            
+            batch_text_data_vector = []
             batch_labels = train_labels[offset:(offset + BATCH_SIZE)]
             # This dictionary maps the batch data (as a numpy array) to the
             # node in the graph is should be fed to.
             #print batch_data.shape
             feed_dict = {train_data_node: batch_data,
+                         train_text_node: batch_text_data_vector,
                          train_labels_node: batch_labels}
             # Run the graph and fetch some of the nodes.
             #print batch_data.shape
