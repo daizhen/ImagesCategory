@@ -9,6 +9,7 @@ sys.path.append('../util/')
 import CSVUtil;
 import TextVectorUtil
 import random
+import os
 
 def PrepareDataSet():
     
@@ -53,7 +54,7 @@ def PrepareDataSet():
     
     resultList = []
     for imageName in imageTokensDict.keys():
-        if imageName in imageCategoryDict and imageName in imageSubcategoryDict and imageName in imageProductTypeDict and imageName in imageProductDict:
+        if imageName in imageCategoryDict and imageName in imageSubcategoryDict and imageName in imageProductTypeDict and imageName in imageProductDict and os.path.exists(os.path.join('../../data/100_100/',imageName)):
             resultList.append((imageName,imageCategoryDict[imageName],imageSubcategoryDict[imageName],imageProductTypeDict[imageName],imageProductDict[imageName],' '.join(imageTokensDict[imageName])))
         else:
             #print imageName
