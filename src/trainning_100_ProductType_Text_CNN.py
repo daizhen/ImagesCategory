@@ -49,7 +49,7 @@ def main(argv=None):  # pylint: disable=unused-argument
 
     print "train_labels",train_labels.shape
     
-    tokenDict = TextVectorUtil.GetAllTokenDict('../../data/all_trainning_tokens.csv')
+    tokenDict = TextVectorUtil.GetAllTokenDict('../data/all_trainning_tokens.csv')
     
     tokenCount = len(tokenDict)
     
@@ -272,7 +272,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             offset = (step * BATCH_SIZE) % (train_size - BATCH_SIZE)
             batch_data = train_data[offset:(offset + BATCH_SIZE), :, :, :]
             batch_text_data = train_tokens_list[offset:(offset + BATCH_SIZE)]
-            batch_text_data_vector = []
+            batch_text_data_vector = TextVectorUtil.BuildText2DimArray(batch_text_data,tokenDict)
             batch_labels = train_labels[offset:(offset + BATCH_SIZE)]
             # This dictionary maps the batch data (as a numpy array) to the
             # node in the graph is should be fed to.
@@ -298,10 +298,12 @@ def main(argv=None):  # pylint: disable=unused-argument
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % error_rate(predictions,
                                                              batch_labels)
-            if step % 100 == 0:                                                       
+            if step % 100 == 0:      
+                '''                                                 
                 print 'Validation error: %.1f%%' % error_rate(
                     s.run(validation_prediction, feed_dict = {validation_data_node: validation_data}), validation_labels)
                 sys.stdout.flush()
+                '''
         FreezeGraph(s)
         #saver.save(s,save_path='../models/producttype/train_result')
         # Finally print the result!

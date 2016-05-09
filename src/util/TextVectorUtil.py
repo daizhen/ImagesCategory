@@ -49,6 +49,14 @@ def GetTextVector(tokenList, allTokenDict):
             allTokenDict[token] = 0.5  
     return [allTokenDict[key] for key in allTokenDict.keys()]
 
+def BuildText2DimArray(listOftokenList, allTokenDict):
+    resultArray = np.ndarray(
+                shape=[len(listOftokenList),len(allTokenDict)],
+                dtype=np.float32)
+    for index in range(len(listOftokenList)):
+        resultArray[GetTextVector(listOftokenList[index],allTokenDict)]
+    return  resultArray   
+                    
 '''     
 if __name__ == "__main__":
     GetAllTokenDict('../../data/all_tokens.csv')
