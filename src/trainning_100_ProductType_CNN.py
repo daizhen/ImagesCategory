@@ -1,16 +1,8 @@
-"""Simple, end-to-end, LeNet-5-like convolutional MNIST model example.
-
-This should achieve a test error of 0.8%. Please keep this model as simple and
-linear as possible, it is meant as a tutorial for simple convolutional models.
-Run with --self_test on the command line to exectute a short self-test.
-"""
 import gzip
 import os
 import sys
 import urllib
-
 import tensorflow.python.platform
-
 import numpy
 import tensorflow as tf
 import csv
@@ -20,7 +12,6 @@ from PIL import Image
 
 from util.freeze_graph import freeze_graph
 
-WORK_DIRECTORY = 'data'
 IMAGE_SIZE = 100
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
@@ -46,7 +37,6 @@ def LoadPossibleLabels():
         if index != 0:
             currentLabel = line[0]
             if not currentLabel in label_list:
-                
                 label_list.append(currentLabel);
         index +=1
     csvfile.close()

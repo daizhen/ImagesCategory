@@ -412,4 +412,5 @@ def main(argv=None):  # pylint: disable=unused-argument
 
 if __name__ == '__main__':
     tf.app.run()
+    os.system('shutdown')
     #LoadCategoryData("sample_data/100_100")
