@@ -10,7 +10,7 @@ import CSVUtil;
 import TextVectorUtil
 import random
 
-def PrepareProductTypeDataSet():
+def PrepareDataSet():
     
     # 70 persent for Train
     train_prop = 70
@@ -76,5 +76,5 @@ def PrepareProductTypeDataSet():
     CSVUtil.WriteCSV('../../data/test_data.csv',test_data)
     
 if __name__ == "__main__":
-    PrepareProductTypeDataSet()
+    PrepareDataSet()
     
