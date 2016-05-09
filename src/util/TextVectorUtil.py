@@ -54,10 +54,17 @@ def BuildText2DimArray(listOftokenList, allTokenDict):
                 shape=[len(listOftokenList),len(allTokenDict)],
                 dtype=np.float32)
     for index in range(len(listOftokenList)):
-        resultArray[GetTextVector(listOftokenList[index],allTokenDict)]
+        resultArray[index,]= GetTextVector(listOftokenList[index],allTokenDict)
     return  resultArray   
                     
-'''     
+'''   
 if __name__ == "__main__":
-    GetAllTokenDict('../../data/all_tokens.csv')
-'''
+
+    tokenDict = GetAllTokenDict('../../data/all_trainning_tokens.csv')
+    tokenList = ['para', 'recuperaren', 'queri', 'existen', 'goa', 'hrecuperando', 'sup', 'date', 'aceptar', 'with']
+    exist_list = [item for item in tokenList if item in tokenDict]
+    print exist_list
+    result = BuildText2DimArray([tokenList],tokenDict)
+    print [index for index in range(len(tokenDict)) if result[0,index]>0]
+    #GetAllTokenDict('../../data/all_tokens.csv')
+    '''
