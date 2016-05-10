@@ -13,6 +13,7 @@ from util.freeze_graph import freeze_graph
 
 import util.DataUtil as DataUtil
 import util.TextVectorUtil as TextVectorUtil
+import util.ModelUtil as ModelUtil
 
 IMAGE_SIZE = 100
 NUM_CHANNELS = 1
@@ -26,13 +27,6 @@ NUM_EPOCHS = 10
 
 tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
-
-def error_rate(predictions, labels):
-    """Return the error rate based on dense predictions and 1-hot labels."""
-    return 100.0 - (
-        100.0 *
-        numpy.sum(numpy.argmax(predictions, 1) == numpy.argmax(labels, 1)) /
-        predictions.shape[0])
 
 
 def main(argv=None):  # pylint: disable=unused-argument
@@ -73,16 +67,11 @@ def main(argv=None):  # pylint: disable=unused-argument
     #validation_data_node = tf.constant(validation_data)
     #test_data_node = tf.constant(test_data)
     
-    validation_data_node = tf.placeholder(tf.float32,shape=(validation_size, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
-    validation_text_node = tf.placeholder(
-        tf.float32,
-        shape=(validation_size, tokenCount))
+    validation_data_node = tf.placeholder(tf.float32,shape=(None, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
+    validation_text_node = tf.placeholder(tf.float32, shape=(None, tokenCount))
         
-    test_data_node = tf.placeholder(tf.float32,shape=(test_size, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
-    
-    test_text_node = tf.placeholder(
-        tf.float32,
-        shape=(test_size, tokenCount))
+    test_data_node = tf.placeholder(tf.float32,shape=(None, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
+    test_text_node = tf.placeholder(tf.float32,shape=(None, tokenCount))
         
     check_data_node = tf.placeholder(tf.float32, shape=(1, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS), name='check_data_node')
     check_text_node = tf.placeholder(tf.float32,shape=(1, tokenCount))
@@ -182,7 +171,25 @@ def main(argv=None):  # pylint: disable=unused-argument
         if train:
             hidden = tf.nn.dropout(hidden, 0.5, seed=SEED)
         return tf.matmul(hidden, fc2_weights) + fc2_biases
-
+    def CaculateErrorRate(session,dataList,tokenList,labels):
+        data_size = dataList.shape[0]
+        errorCount = 0;
+        for step in xrange(int(data_size / BATCH_SIZE)):
+            offset = (step * BATCH_SIZE)
+            batch_data = dataList[offset:(offset + BATCH_SIZE), :, :, :]
+            batch_text_data = tokenList[offset:(offset + BATCH_SIZE)]
+            batch_text_data_vector = TextVectorUtil.BuildText2DimArray(batch_text_data,tokenDict)
+            batch_labels = labels[offset:(offset + BATCH_SIZE)]
+            feed_dict = {validation_data_node: batch_data,
+                         validation_text_node: batch_text_data_vector,
+                         validation_labels_node: batch_labels}
+            # Run the graph and fetch some of the nodes.
+            #print batch_data.shape
+            #print batch_labels.shape
+            #print train_labels
+            validation_prediction_result = session.run(validation_prediction,feed_dict=feed_dict)
+            errorCount += ModelUtil.error_count(validation_prediction_result,batch_labels)
+        return  errorCount *100.0/ data_size           
     def FreezeGraph(sess):
         model_folder = '../models/producttype/'
         checkpoint_prefix = os.path.join(model_folder, "saved_checkpoint")
@@ -296,23 +303,19 @@ def main(argv=None):  # pylint: disable=unused-argument
                 
                 print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
-                print 'Minibatch error: %.1f%%' % error_rate(predictions,
-                                                             batch_labels)
-            if step % 100 == 0:      
-                '''                                                 
-                print 'Validation error: %.1f%%' % error_rate(
-                    s.run(validation_prediction, feed_dict = {validation_data_node: validation_data}), validation_labels)
+                print 'Minibatch error: %.1f%%' % ModelUtil.error_rate(predictions,batch_labels)
+            if step % 1 == 0:                                
+                print 'Validation error: %.1f%%' % CaculateErrorRate(s,validation_data,validation_tokens_list,validation_labels)
                 sys.stdout.flush()
-                '''
+                
         FreezeGraph(s)
         #saver.save(s,save_path='../models/producttype/train_result')
         # Finally print the result!
-        test_error = error_rate( s.run(test_prediction, feed_dict = {test_data_node: test_data}), test_labels)
+        test_error = CaculateErrorRate(s,test_data,test_tokens_list,test_labels)
         print 'Test error: %.1f%%' % test_error
         if FLAGS.self_test:
             print 'test_error', test_error
-            assert test_error == 0.0, 'expected 0.0 test_error, got %.2f' % (
-                test_error,)
+            assert test_error == 0.0, 'expected 0.0 test_error, got %.2f' % (test_error,)
 
 
 if __name__ == '__main__':
