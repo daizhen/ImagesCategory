@@ -35,18 +35,18 @@ def GetAllTokenDict(fileName):
     tokenList = CSVUtil.ReadCSV(fileName)
     tokenDict = {}
     for token in tokenList:
-        tokenDict[token[0]] = -0.5
+        tokenDict[token[0]] = 0
     #print tokenDict
     return tokenDict
     
 def GetTextVector(tokenList, allTokenDict):
     #Init all value to -0.5
     for key in allTokenDict.keys():
-        allTokenDict[key] = -0.5
+        allTokenDict[key] = 0
         
     for token in tokenList:
         if token in allTokenDict:
-            allTokenDict[token] = 0.5  
+            allTokenDict[token] = 1  
     return [allTokenDict[key] for key in allTokenDict.keys()]
 
 def BuildText2DimArray(listOftokenList, allTokenDict):
