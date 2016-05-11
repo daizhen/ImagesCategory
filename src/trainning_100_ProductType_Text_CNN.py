@@ -67,11 +67,13 @@ def main(argv=None):  # pylint: disable=unused-argument
     #validation_data_node = tf.constant(validation_data)
     #test_data_node = tf.constant(test_data)
     
-    validation_data_node = tf.placeholder(tf.float32,shape=(None, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
-    validation_text_node = tf.placeholder(tf.float32, shape=(None, tokenCount))
+    validation_data_node = tf.placeholder(tf.float32,shape=(BATCH_SIZE, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
+    validation_text_node = tf.placeholder(tf.float32, shape=(BATCH_SIZE, tokenCount))
         
-    test_data_node = tf.placeholder(tf.float32,shape=(None, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
-    test_text_node = tf.placeholder(tf.float32,shape=(None, tokenCount))
+    validation_labels_node = tf.placeholder(tf.float32, shape=(BATCH_SIZE, labelCount))
+    
+    test_data_node = tf.placeholder(tf.float32,shape=(BATCH_SIZE, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']))
+    test_text_node = tf.placeholder(tf.float32,shape=(BATCH_SIZE, tokenCount))
         
     check_data_node = tf.placeholder(tf.float32, shape=(1, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS), name='check_data_node')
     check_text_node = tf.placeholder(tf.float32,shape=(1, tokenCount))
