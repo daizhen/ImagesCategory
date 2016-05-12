@@ -18,7 +18,6 @@ import util.ModelUtil as ModelUtil
 IMAGE_SIZE = 100
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
-NUM_LABELS = 111
 SEED = 66478  # Set to None for random seed.
 #BATCH_SIZE = 100
 BATCH_SIZE = 100
@@ -33,9 +32,9 @@ def main(argv=None):  # pylint: disable=unused-argument
     
     imageInfo={'WIDTH':100,'HEIGHT':100,'CHANNELS':1}
     
-    train_data, train_tokens_list,train_labels = DataUtil.LoadProductTypeData('../data/trainning_data.csv','../producttype_name_id_map.csv','../data/100_100',imageInfo)
-    validation_data, validation_tokens_list,validation_labels = DataUtil.LoadProductTypeData('../data/validation_data.csv','../producttype_name_id_map.csv','../data/100_100',imageInfo)
-    test_data, test_tokens_list,test_labels = DataUtil.LoadProductTypeData('../data/test_data.csv','../producttype_name_id_map.csv','../data/100_100',imageInfo)
+    train_data, train_tokens_list,train_labels = DataUtil.LoadProductData('../data/trainning_data.csv','../product_name_id_map.csv','../data/100_100',imageInfo)
+    validation_data, validation_tokens_list,validation_labels = DataUtil.LoadProductData('../data/validation_data.csv','../product_name_id_map.csv','../data/100_100',imageInfo)
+    test_data, test_tokens_list,test_labels = DataUtil.LoadProductData('../data/test_data.csv','../product_name_id_map.csv','../data/100_100',imageInfo)
     
     validation_size = validation_data.shape[0]
     test_size = test_data.shape[0]
@@ -193,7 +192,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             errorCount += ModelUtil.error_count(validation_prediction_result,batch_labels)
         return  errorCount *100.0/ data_size           
     def FreezeGraph(sess):
-        model_folder = '../models/producttype/'
+        model_folder = '../models/product/'
         checkpoint_prefix = os.path.join(model_folder, "saved_checkpoint")
         checkpoint_state_name = "checkpoint_state"
         input_graph_name = "input_graph.pb"
@@ -232,7 +231,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     regularizers = (tf.nn.l2_loss(fc1_weights) + tf.nn.l2_loss(fc1_biases) +
                     tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases))
     # Add the regularization term to the loss.
-    loss += 5e-8 * regularizers
+    loss += 5e-4 * regularizers
 
     # Optimizer: set up a variable that's incremented once per batch and
     # controls the learning rate decay.
@@ -262,7 +261,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     #tf.train.export_meta_graph(filename='./models/producttype/graph.save', as_text=True)
     with tf.Session() as s:
     
-        ckpt = tf.train.get_checkpoint_state('./models/producttype/with_text/')
+        ckpt = tf.train.get_checkpoint_state('./models/product/with_text/')
         tf.initialize_all_variables().run()
         if ckpt and ckpt.model_checkpoint_path:
             print "find the checkpoing file"
@@ -271,7 +270,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             # Run all the initializers to prepare the trainable parameters.
             tf.initialize_all_variables().run()
         #Save the graph model
-        tf.train.write_graph(s.graph_def, '', '../models/producttype/with_text/graph.pb', as_text=False)
+        tf.train.write_graph(s.graph_def, '', '../models/product/with_text/graph.pb', as_text=False)
 
         print 'Initialized!'
         # Loop through training steps.
