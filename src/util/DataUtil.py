@@ -87,7 +87,7 @@ def LoadProductTypeData(csvFilePath,mappingFilePath,imageDir,imageInfo):
     return LoadDataByType(csvFilePath,mappingFilePath,imageDir,imageInfo,'ProductType')  
 def LoadProductData(csvFilePath,mappingFilePath,imageDir,imageInfo):
     return LoadDataByType(csvFilePath,mappingFilePath,imageDir,imageInfo,'Product')  
-
+'''
 if __name__ == "__main__":
     imageInfo={}
     imageInfo['WIDTH'] = 100
@@ -97,3 +97,4 @@ if __name__ == "__main__":
     image_list, tokens_list,label_list_result = LoadDataByType('../../data/trainning_data.csv','../../category_name_id_map.csv','../../data/100_100',imageInfo,'Category')
     print image_list.shape
     print image_list
+'''
