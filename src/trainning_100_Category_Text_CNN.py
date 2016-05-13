@@ -23,7 +23,8 @@ SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 300
 NUM_EPOCHS = 10
 
-
+NAME_ID_MAPPING_NAME = 'category_name_id_map.csv'
+MODEL_FOLDER = '../models/category/'
 tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
 
@@ -32,9 +33,9 @@ def main(argv=None):  # pylint: disable=unused-argument
     
     imageInfo={'WIDTH':100,'HEIGHT':100,'CHANNELS':1}
     
-    train_data, train_tokens_list,train_labels = DataUtil.LoadProductData('../data/trainning_data.csv','../product_name_id_map.csv','../data/100_100',imageInfo)
-    validation_data, validation_tokens_list,validation_labels = DataUtil.LoadProductData('../data/validation_data.csv','../product_name_id_map.csv','../data/100_100',imageInfo)
-    test_data, test_tokens_list,test_labels = DataUtil.LoadProductData('../data/test_data.csv','../product_name_id_map.csv','../data/100_100',imageInfo)
+    train_data, train_tokens_list,train_labels = DataUtil.LoadCategoryData('../data/trainning_data.csv','../'+NAME_ID_MAPPING_NAME,'../data/100_100',imageInfo)
+    validation_data, validation_tokens_list,validation_labels = DataUtil.LoadCategoryData('../data/validation_data.csv','../'+NAME_ID_MAPPING_NAME,'../data/100_100',imageInfo)
+    test_data, test_tokens_list,test_labels = DataUtil.LoadCategoryData('../data/test_data.csv','../'+NAME_ID_MAPPING_NAME,'../data/100_100',imageInfo)
     
     validation_size = validation_data.shape[0]
     test_size = test_data.shape[0]
@@ -201,8 +202,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             errorCount += ModelUtil.error_count(validation_prediction_result,batch_labels)
         return  errorCount *100.0/ data_size           
     def FreezeGraph(sess):
-        model_folder = '../models/product/'
-        checkpoint_prefix = os.path.join(model_folder, "saved_checkpoint")
+        checkpoint_prefix = os.path.join(MODEL_FOLDER, "saved_checkpoint")
         checkpoint_state_name = "checkpoint_state"
         input_graph_name = "input_graph.pb"
         output_graph_name = "output_graph.pb"
@@ -212,18 +212,18 @@ def main(argv=None):  # pylint: disable=unused-argument
         saver = tf.train.Saver()
         saver.save(sess, checkpoint_prefix, global_step=0,
                         latest_filename=checkpoint_state_name)
-        tf.train.write_graph(sess.graph.as_graph_def(), model_folder,input_graph_name)
+        tf.train.write_graph(sess.graph.as_graph_def(), MODEL_FOLDER,input_graph_name)
 
         # We save out the graph to disk, and then call the const conversion
         # routine.
-        input_graph_path = os.path.join(model_folder, input_graph_name)
+        input_graph_path = os.path.join(MODEL_FOLDER, input_graph_name)
         input_saver_def_path = ""
         input_binary = False
         input_checkpoint_path = checkpoint_prefix + "-0"
         output_node_names = "check_data_node,check_prediction"
         restore_op_name = "save/restore_all"
         filename_tensor_name = "save/Const:0"
-        output_graph_path = os.path.join(model_folder, output_graph_name)
+        output_graph_path = os.path.join(MODEL_FOLDER, output_graph_name)
         clear_devices = False
 
         freeze_graph(input_graph_path, input_saver_def_path,
@@ -247,7 +247,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     batch = tf.Variable(0)
     # Decay once per epoch, using an exponential schedule starting at 0.01.
     learning_rate = tf.train.exponential_decay(
-        0.003,                # Base learning rate.
+        0.005,                # Base learning rate.
         batch * BATCH_SIZE,  # Current index into the dataset.
         train_size,          # Decay step.
         0.95,                # Decay rate.
@@ -270,7 +270,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     #tf.train.export_meta_graph(filename='./models/producttype/graph.save', as_text=True)
     with tf.Session() as s:
     
-        ckpt = tf.train.get_checkpoint_state('./models/product/with_text/')
+        ckpt = tf.train.get_checkpoint_state(os.path.join(MODEL_FOLDER,'with_text'))
         tf.initialize_all_variables().run()
         if ckpt and ckpt.model_checkpoint_path:
             print "find the checkpoing file"
@@ -279,7 +279,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             # Run all the initializers to prepare the trainable parameters.
             tf.initialize_all_variables().run()
         #Save the graph model
-        tf.train.write_graph(s.graph_def, '', '../models/product/with_text/graph.pb', as_text=False)
+        tf.train.write_graph(s.graph_def, '', os.path.join(MODEL_FOLDER,'with_text/graph.pb'), as_text=False)
 
         print 'Initialized!'
         # Loop through training steps.
@@ -314,7 +314,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                 print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % ModelUtil.error_rate(predictions,batch_labels)
-            if step % 100 == 0:                                
+            if step % 100 == 0 and step != 0 :                                
                 print 'Validation error: %.1f%%' % CaculateErrorRate(s,validation_data,validation_tokens_list,validation_labels)
                 sys.stdout.flush()
                 

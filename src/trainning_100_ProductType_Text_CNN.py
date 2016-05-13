@@ -306,6 +306,9 @@ def main(argv=None):  # pylint: disable=unused-argument
                 print 'Epoch %.2f' % (float(step) * BATCH_SIZE / train_size)
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % ModelUtil.error_rate(predictions,batch_labels)
+                weights = s.run(fc1_weights)
+                print 'Text weight:%.4f' % sum(weights[-tokenCount:,0])
+                
             if step % 100 == 0:                                
                 print 'Validation error: %.1f%%' % CaculateErrorRate(s,validation_data,validation_tokens_list,validation_labels)
                 sys.stdout.flush()
