@@ -48,6 +48,22 @@ def _loadData(csvFilePath,imageDir,imageInfo):
     image_list = (image_list - (255 / 2.0)) / 255        
     return image_list, np.array(tokens_list)
 
+def LoadTextTokenList(csvFilePath):
+    regEx = re.compile('\\W*')
+    plainData = CSVUtil.ReadCSV(csvFilePath)
+    print csvFilePath
+    #labels = LoadAllLabels(mappingFilePath)
+    data_count = len(plainData)
+    tokens_list=[]
+    label_list = []
+    for index in range(data_count):
+        dataItem = plainData[index]
+        currentWordList = regEx.split(dataItem[-1])
+        label_list.append(dataItem[1:5])
+        tokens_list.append(currentWordList)
+    
+    return np.array(tokens_list), label_list
+    
 def LoadDataByType(csvFilePath,mappingFilePath,imageDir,imageInfo,dataType):
     columnIndex = 1
     if dataType == 'Category':

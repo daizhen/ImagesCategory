@@ -22,7 +22,7 @@ NUM_LABELS = 111
 SEED = 66478  # Set to None for random seed.
 #BATCH_SIZE = 100
 BATCH_SIZE = 300
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 
 
 tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")

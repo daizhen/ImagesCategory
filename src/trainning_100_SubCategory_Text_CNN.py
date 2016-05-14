@@ -21,7 +21,7 @@ PIXEL_DEPTH = 255
 SEED = 66478  # Set to None for random seed.
 #BATCH_SIZE = 100
 BATCH_SIZE = 300
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 
 NAME_ID_MAPPING_NAME = 'subcategory_name_id_map.csv'
 MODEL_FOLDER = '../models/subcategory/'

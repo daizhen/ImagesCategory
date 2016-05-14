@@ -21,7 +21,7 @@ PIXEL_DEPTH = 255
 SEED = 66478  # Set to None for random seed.
 #BATCH_SIZE = 100
 BATCH_SIZE = 300
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 
 NAME_ID_MAPPING_NAME = 'category_name_id_map.csv'
 MODEL_FOLDER = '../models/category/'
@@ -36,7 +36,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     train_data, train_tokens_list,train_labels = DataUtil.LoadCategoryData('../data/trainning_data.csv','../'+NAME_ID_MAPPING_NAME,'../data/100_100',imageInfo)
     validation_data, validation_tokens_list,validation_labels = DataUtil.LoadCategoryData('../data/validation_data.csv','../'+NAME_ID_MAPPING_NAME,'../data/100_100',imageInfo)
     test_data, test_tokens_list,test_labels = DataUtil.LoadCategoryData('../data/test_data.csv','../'+NAME_ID_MAPPING_NAME,'../data/100_100',imageInfo)
-    
+    print train_labels
     validation_size = validation_data.shape[0]
     test_size = test_data.shape[0]
     train_size = train_data.shape[0]
@@ -176,11 +176,15 @@ def main(argv=None):  # pylint: disable=unused-argument
         hidden1 = tf.nn.relu(tf.matmul(reshape, fc1_weights) + fc1_biases)
         # Add a 50% dropout during training only. Dropout also scales
         # activations such that no rescaling is needed at evaluation time.
+        '''
         if train:
             hidden1 = tf.nn.dropout(hidden1, 0.5, seed=SEED)
+        '''
         hidden2 = tf.nn.relu(tf.matmul(hidden1, fc2_weights) + fc2_biases)
+        '''
         if train:
             hidden2 = tf.nn.dropout(hidden2, 0.5, seed=SEED)
+        '''
         return tf.matmul(hidden2, fc3_weights) + fc3_biases
     def CaculateErrorRate(session,dataList,tokenList,labels):
         data_size = dataList.shape[0]
@@ -240,14 +244,14 @@ def main(argv=None):  # pylint: disable=unused-argument
     regularizers = (tf.nn.l2_loss(fc1_weights) + tf.nn.l2_loss(fc1_biases) +
                     tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases))
     # Add the regularization term to the loss.
-    loss += 5e-6 * regularizers
+    #loss += 5e-8 * regularizers
 
     # Optimizer: set up a variable that's incremented once per batch and
     # controls the learning rate decay.
     batch = tf.Variable(0)
     # Decay once per epoch, using an exponential schedule starting at 0.01.
     learning_rate = tf.train.exponential_decay(
-        0.005,                # Base learning rate.
+        0.003,                # Base learning rate.
         batch * BATCH_SIZE,  # Current index into the dataset.
         train_size,          # Decay step.
         0.95,                # Decay rate.
