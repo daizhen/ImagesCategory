@@ -20,7 +20,7 @@ IMAGE_SIZE = 100
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
 SEED = 66478  # Set to None for random seed.
-BATCH_SIZE = 300
+BATCH_SIZE = 100
 NUM_EPOCHS = 20
 
 NUM_LABELS = 3
@@ -67,17 +67,17 @@ Following defined the variables for 2nd-phase
 '''
 
 fc1_weights = tf.Variable(
-    tf.truncated_normal([int(imageInfo['WIDTH'] / 4) * int(imageInfo['HEIGHT'] / 4) * 64 + tokenCount, 800],
+    tf.truncated_normal([int(imageInfo['WIDTH'] / 4) * int(imageInfo['HEIGHT'] / 4) * 64 + tokenCount, 400],
                             stddev=0.1,
                             seed=SEED), name='fc1_weights')
-fc1_biases = tf.Variable(tf.constant(0.1, shape=[800]), name='fc1_biases')
+fc1_biases = tf.Variable(tf.constant(0.1, shape=[400]), name='fc1_biases')
 
 fc2_weights = tf.Variable(
-    tf.truncated_normal([800, 800],stddev=0.1,seed=SEED), name='fc2_weights')
-fc2_biases = tf.Variable(tf.constant(0.1, shape=[800]), name='fc2_biases')
+    tf.truncated_normal([400, 400],stddev=0.1,seed=SEED), name='fc2_weights')
+fc2_biases = tf.Variable(tf.constant(0.1, shape=[400]), name='fc2_biases')
     
 fc3_weights = tf.Variable(
-    tf.truncated_normal([800, NUM_LABELS],stddev=0.1,seed=SEED), name='fc3_weights')
+    tf.truncated_normal([400, NUM_LABELS],stddev=0.1,seed=SEED), name='fc3_weights')
 fc3_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]), name='fc3_biases')
 
 batch_2 = tf.Variable(0, name='batch_2')
@@ -222,10 +222,10 @@ def trainModel_2():
     input_d = int(imageInfo['WIDTH'] / 4) * int(imageInfo['HEIGHT'] / 4) * 64 + tokenCount
     
     train_data_node = tf.placeholder(tf.float32, shape=[None, input_d])
-    train_labels_node = tf.placeholder(tf.float32, shape=(None, input_d))
+    train_labels_node = tf.placeholder(tf.float32, shape=(None, NUM_LABELS))
 
     validation_data_node = tf.placeholder(tf.float32, shape=[None, input_d])
-    validation_labels_node = tf.placeholder(tf.float32,  shape=[None, input_d])
+    validation_labels_node = tf.placeholder(tf.float32,  shape=[None, NUM_LABELS])
     
     logits = model_2(train_data_node,True)
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, train_labels_node))
@@ -254,13 +254,19 @@ def trainModel_2():
     validation_prediction = tf.nn.softmax(model_2(validation_data_node))
     
     
-    def CaculateErrorRate(session,dataList,labels):
+    def CaculateErrorRate(session,dataList, labels):
         data_size = dataList.shape[0]
         errorCount = 0;
         for step in xrange(int(data_size / BATCH_SIZE)):
             offset = (step * BATCH_SIZE)
-            batch_data = dataList[offset:(offset + BATCH_SIZE), :, :, :]
+            batch_data_image = dataList[offset:(offset + BATCH_SIZE), :, :, :]
             batch_labels = labels[offset:(offset + BATCH_SIZE)]
+            
+            batch_text_data = train_tokens_list[offset:(offset + BATCH_SIZE)]
+            batch_text_data_vector = TextVectorUtil.BuildText2DimArray(batch_text_data,tokenDict)
+            feature_values = s.run(model_1_features,feed_dict={train_data_node_model_1:batch_data_image})
+            batch_data = numpy.append(feature_values,batch_text_data_vector,1)
+            
             feed_dict = {validation_data_node: batch_data,
                          validation_labels_node: batch_labels}
             validation_prediction_result = session.run(validation_prediction,feed_dict=feed_dict)
@@ -282,7 +288,7 @@ def trainModel_2():
             batch_text_data_vector = TextVectorUtil.BuildText2DimArray(batch_text_data,tokenDict)
             
             feature_values = s.run(model_1_features,feed_dict={train_data_node_model_1:batch_data_image})
-            batch_data = tf.concat(1,[feature_values,batch_text_data_vector])
+            batch_data = numpy.append(feature_values,batch_text_data_vector,1)
             # This dictionary maps the batch data (as a numpy array) to the
             # node in the graph is should be fed to.
             #print batch_data.shape
@@ -295,7 +301,7 @@ def trainModel_2():
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % ModelUtil.error_rate(predictions,batch_labels)
                 sys.stdout.flush()
-            if step % 100 == 0 and step != 0 :                                
+            if step % 20 == 0 and step != 0 :                                
                 print 'Validation error: %.1f%%' % CaculateErrorRate(s,validation_data,validation_labels)
                 sys.stdout.flush()
                     
