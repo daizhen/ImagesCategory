@@ -1,4 +1,5 @@
-data
 sample_data
 models
 *.pyc
+data/
+
