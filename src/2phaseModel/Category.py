@@ -20,7 +20,7 @@ IMAGE_SIZE = 100
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
 SEED = 66478  # Set to None for random seed.
-BATCH_SIZE = 100
+BATCH_SIZE = 200
 NUM_EPOCHS = 20
 
 NUM_LABELS = 3
@@ -40,34 +40,34 @@ tokenCount = len(tokenDict)
 
 # Variable def for 1st phase training and will be used for 2nd phase
 conv1_weights = tf.Variable(
-    tf.truncated_normal([5, 5, imageInfo['CHANNELS'], 32],  stddev=0.01,seed=SEED), 
+    tf.truncated_normal([5, 5, imageInfo['CHANNELS'], 16],  stddev=0.01,seed=SEED), 
     name='conv1_weights')
-conv1_biases = tf.Variable(tf.zeros([32]), name='conv1_biases')
+conv1_biases = tf.Variable(tf.zeros([16]), name='conv1_biases')
 	
 conv2_weights = tf.Variable(
-    tf.truncated_normal([5, 5, 32, 64],stddev=0.01, seed=SEED), 
+    tf.truncated_normal([5, 5, 16, 32],stddev=0.01, seed=SEED), 
     name='conv2_weights')
-conv2_biases = tf.Variable(tf.constant(0.01, shape=[64]), name='conv2_biases')
-'''    
+conv2_biases = tf.Variable(tf.constant(0.01, shape=[32]), name='conv2_biases')
+ 
 conv3_weights = tf.Variable(
-    tf.truncated_normal([5, 5, 64, 128],stddev=0.01,seed=SEED), 
+    tf.truncated_normal([5, 5, 32, 64],stddev=0.01,seed=SEED), 
     name='conv3_weights') 
-conv3_biases = tf.Variable(tf.constant(0.1, shape=[128]), name='conv3_biases')
-'''
+conv3_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv3_biases')
+
 fc_weights = tf.Variable(  # fully connected, depth 1024.
-    tf.truncated_normal([int(imageInfo['WIDTH'] / 4) * int(imageInfo['HEIGHT'] / 4) * 64 , NUM_LABELS],stddev=0.1,seed=SEED), name='fc_weights')
+    tf.truncated_normal([int(imageInfo['WIDTH'] / 8) * int(imageInfo['HEIGHT'] / 8) * 64 , NUM_LABELS],stddev=0.1,seed=SEED), name='fc_weights')
 fc_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]), name='fc_biases')
 
 batch_1 = tf.Variable(0, name='batch_1')
 
-store_list = [conv1_weights,conv1_biases,conv2_weights,conv2_biases,fc_weights,fc_biases,batch_1]
+store_list = [conv1_weights,conv1_biases,conv2_weights,conv2_biases,conv3_weights,conv3_biases,fc_weights,fc_biases,batch_1]
 
 '''
 Following defined the variables for 2nd-phase 
 '''
 
 fc1_weights = tf.Variable(
-    tf.truncated_normal([int(imageInfo['WIDTH'] / 4) * int(imageInfo['HEIGHT'] / 4) * 64 + tokenCount, 400],
+    tf.truncated_normal([int(imageInfo['WIDTH'] / 8) * int(imageInfo['HEIGHT'] / 8) * 64 + tokenCount, 400],
                             stddev=0.1,
                             seed=SEED), name='fc1_weights')
 fc1_biases = tf.Variable(tf.constant(0.1, shape=[400]), name='fc1_biases')
@@ -96,13 +96,12 @@ def model_1(data,comput_features=False):
     conv = tf.nn.conv2d(pool,conv2_weights,strides=[1, 1, 1, 1],padding='SAME')
     relu = tf.nn.relu(tf.nn.bias_add(conv, conv2_biases))
     pool = tf.nn.max_pool(relu,ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1],padding='SAME')
-    
-    '''
+
     print pool.get_shape().as_list()
     conv = tf.nn.conv2d(pool,conv3_weights,strides=[1, 1, 1, 1],padding='SAME')
     relu = tf.nn.relu(tf.nn.bias_add(conv, conv3_biases))
     pool = tf.nn.max_pool(relu,ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1],padding='VALID')
-    '''
+
                                                             
     # Reshape the feature map cuboid into a 2D matrix to feed it to the
     # fully connected layers.
@@ -118,13 +117,13 @@ def model_2(data, isTrain = False):
     hidden1 = tf.nn.relu(tf.matmul(data, fc1_weights) + fc1_biases)
     # Add a 50% dropout during training only. Dropout also scales
     # activations such that no rescaling is needed at evaluation time.
-
+    dropout_value = 0.8
     if isTrain:
-        hidden1 = tf.nn.dropout(hidden1, 0.5, seed=SEED)
+        hidden1 = tf.nn.dropout(hidden1, dropout_value, seed=SEED)
     hidden2 = tf.nn.relu(tf.matmul(hidden1, fc2_weights) + fc2_biases)
     
     if isTrain:
-        hidden2 = tf.nn.dropout(hidden2, 0.5, seed=SEED)
+        hidden2 = tf.nn.dropout(hidden2, dropout_value, seed=SEED)
         
     return tf.matmul(hidden2, fc3_weights) + fc3_biases
     
@@ -219,7 +218,7 @@ def trainModel_2():
     test_size = test_data.shape[0]
     train_size = train_data.shape[0]
     labelCount = train_labels.shape[1]
-    input_d = int(imageInfo['WIDTH'] / 4) * int(imageInfo['HEIGHT'] / 4) * 64 + tokenCount
+    input_d = int(imageInfo['WIDTH'] / 8) * int(imageInfo['HEIGHT'] / 8) * 64 + tokenCount
     
     train_data_node = tf.placeholder(tf.float32, shape=[None, input_d])
     train_labels_node = tf.placeholder(tf.float32, shape=(None, NUM_LABELS))
@@ -234,7 +233,7 @@ def trainModel_2():
     regularizers = (tf.nn.l2_loss(fc1_weights) + tf.nn.l2_loss(fc1_biases) +
                     tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases))
     # Add the regularization term to the loss.
-    loss += 5e-8 * regularizers
+    #loss += 5e-8 * regularizers
     
     train_data_node_model_1 = tf.placeholder(tf.float32, shape=[BATCH_SIZE, imageInfo['WIDTH'], imageInfo['HEIGHT'], imageInfo['CHANNELS']])
     model_1_features = model_1(train_data_node_model_1,True)
@@ -247,8 +246,8 @@ def trainModel_2():
         0.95,                # Decay rate.
         staircase=True)
     # Use simple momentum for the optimization.
-    optimizer = tf.train.MomentumOptimizer(learning_rate,0.9).minimize(loss,global_step=batch_2)
-
+    #optimizer = tf.train.MomentumOptimizer(learning_rate,0.9).minimize(loss,global_step=batch_2)
+    optimizer = tf.train.RMSPropOptimizer(0.01, 0.95).minimize(loss,global_step=batch_2)
     # Predictions for the minibatch, validation set and test set.
     train_prediction = tf.nn.softmax(logits)
     validation_prediction = tf.nn.softmax(model_2(validation_data_node))
@@ -292,6 +291,8 @@ def trainModel_2():
             # This dictionary maps the batch data (as a numpy array) to the
             # node in the graph is should be fed to.
             #print batch_data.shape
+            #print 'max value:',numpy.max(feature_values)
+            #print 'min value:',numpy.min(feature_values)
             feed_dict = {train_data_node: batch_data,train_labels_node: batch_labels}
             # Run the graph and fetch some of the nodes.
             _, l, lr, predictions = s.run([optimizer, loss, learning_rate, train_prediction],feed_dict=feed_dict)
@@ -301,7 +302,7 @@ def trainModel_2():
                 print 'Minibatch loss: %.3f, learning rate: %.6f' % (l, lr)
                 print 'Minibatch error: %.1f%%' % ModelUtil.error_rate(predictions,batch_labels)
                 sys.stdout.flush()
-            if step % 20 == 0 and step != 0 :                                
+            if step % 100 == 0 and step != 0 :                                
                 print 'Validation error: %.1f%%' % CaculateErrorRate(s,validation_data,validation_labels)
                 sys.stdout.flush()
                     
@@ -586,5 +587,6 @@ def main_1(argv=None):  # pylint: disable=unused-argument
 
 
 if __name__ == '__main__':
+    #trainModel_1()
     trainModel_2()
     #LoadCategoryData("sample_data/100_100")
