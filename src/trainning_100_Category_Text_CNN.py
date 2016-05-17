@@ -88,35 +88,36 @@ def main(argv=None):  # pylint: disable=unused-argument
     conv1_biases = tf.Variable(tf.zeros([32]), name='conv1_biases')
 	
     conv2_weights = tf.Variable(
-        tf.truncated_normal([5, 5, 32, 64],
+        tf.truncated_normal([5, 5, 32, 32],
                             stddev=0.1,
                             seed=SEED), name='conv2_weights')
-    conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv2_biases')
-    conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv2_biases')   
+    conv2_biases = tf.Variable(tf.constant(0.1, shape=[32]), name='conv2_biases')
     
     conv3_weights = tf.Variable(
-        tf.truncated_normal([5, 5, 64, 128],
+        tf.truncated_normal([5, 5, 32, 64],
                             stddev=0.1,
                             seed=SEED), name='conv3_weights') 
-    conv3_biases = tf.Variable(tf.constant(0.1, shape=[128]), name='conv3_biases')
+    conv3_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv3_biases')
     
     fc1_weights = tf.Variable(  # fully connected, depth 1024.
-        tf.truncated_normal([int(imageInfo['WIDTH'] / 8) * int(imageInfo['HEIGHT'] / 8) * 128 + tokenCount, 800],
+        tf.truncated_normal([int(imageInfo['WIDTH'] / 8) * int(imageInfo['HEIGHT'] / 8) * 64 + tokenCount, 300],
                             stddev=0.1,
                             seed=SEED), name='fc1_weights')
-    fc1_biases = tf.Variable(tf.constant(0.1, shape=[800]), name='fc1_biases')
+    fc1_biases = tf.Variable(tf.constant(0.1, shape=[300]), name='fc1_biases')
+    
+    
     fc2_weights = tf.Variable(
-        tf.truncated_normal([800, 800],
+        tf.truncated_normal([300, labelCount],
                             stddev=0.1,
                             seed=SEED), name='fc2_weights')
-    fc2_biases = tf.Variable(tf.constant(0.1, shape=[800]), name='fc2_biases')
-    
+    fc2_biases = tf.Variable(tf.constant(0.1, shape=[labelCount]), name='fc2_biases')
+    '''
     fc3_weights = tf.Variable(
         tf.truncated_normal([800, labelCount],
                             stddev=0.1,
                             seed=SEED), name='fc3_weights')
     fc3_biases = tf.Variable(tf.constant(0.1, shape=[labelCount]), name='fc3_biases')
-    
+    '''
     # Var list to save
     #varlist = [conv1_weights,conv1_biases,conv2_weights,conv2_biases,fc1_weights,fc1_biases,fc2_weights,fc2_biases]
 
@@ -176,16 +177,16 @@ def main(argv=None):  # pylint: disable=unused-argument
         hidden1 = tf.nn.relu(tf.matmul(reshape, fc1_weights) + fc1_biases)
         # Add a 50% dropout during training only. Dropout also scales
         # activations such that no rescaling is needed at evaluation time.
-        '''
+
         if train:
-            hidden1 = tf.nn.dropout(hidden1, 0.5, seed=SEED)
+            hidden1 = tf.nn.dropout(hidden1, 0.8, seed=SEED)
         '''
         hidden2 = tf.nn.relu(tf.matmul(hidden1, fc2_weights) + fc2_biases)
-        '''
+
         if train:
             hidden2 = tf.nn.dropout(hidden2, 0.5, seed=SEED)
         '''
-        return tf.matmul(hidden2, fc3_weights) + fc3_biases
+        return tf.matmul(hidden1, fc2_weights) + fc2_biases
     def CaculateErrorRate(session,dataList,tokenList,labels):
         data_size = dataList.shape[0]
         errorCount = 0;
@@ -244,14 +245,14 @@ def main(argv=None):  # pylint: disable=unused-argument
     regularizers = (tf.nn.l2_loss(fc1_weights) + tf.nn.l2_loss(fc1_biases) +
                     tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases))
     # Add the regularization term to the loss.
-    #loss += 5e-8 * regularizers
+    loss += 5e-8 * regularizers
 
     # Optimizer: set up a variable that's incremented once per batch and
     # controls the learning rate decay.
     batch = tf.Variable(0)
     # Decay once per epoch, using an exponential schedule starting at 0.01.
     learning_rate = tf.train.exponential_decay(
-        0.003,                # Base learning rate.
+        0.01,                # Base learning rate.
         batch * BATCH_SIZE,  # Current index into the dataset.
         train_size,          # Decay step.
         0.95,                # Decay rate.

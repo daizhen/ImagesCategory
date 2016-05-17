@@ -20,7 +20,7 @@ IMAGE_SIZE = 100
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
 SEED = 66478  # Set to None for random seed.
-BATCH_SIZE = 200
+BATCH_SIZE = 300
 NUM_EPOCHS = 20
 
 NUM_LABELS = 3
@@ -587,6 +587,7 @@ def main_1(argv=None):  # pylint: disable=unused-argument
 
 
 if __name__ == '__main__':
-    #trainModel_1()
+    trainModel_1()
+    print 'Model 1 done!'
     trainModel_2()
     #LoadCategoryData("sample_data/100_100")

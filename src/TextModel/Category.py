@@ -19,8 +19,8 @@ def model(X, w_h, w_h2, w_o, p_drop_input, p_drop_hidden,istrain):
     if istrain:
         h = tf.nn.dropout(h, p_drop_hidden)
     h2 = tf.nn.relu(tf.matmul(h, w_h2))
-
-    h2 = tf.nn.dropout(h2, p_drop_hidden)
+    if istrain:
+        h2 = tf.nn.dropout(h2, p_drop_hidden)
 
     return tf.matmul(h2, w_o)
     
