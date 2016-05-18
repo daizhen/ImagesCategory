@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import math
 
-
+'''
 a = tf.Variable(1)
 b = tf.Variable(2)
 pool_va = tf.Variable([1,2,2,1], name="pool")
@@ -27,5 +27,25 @@ print sess.run(pool_va)
 #sess.run(init)
 
 sess.close()
+'''
 
-    
+class TestImport:
+    a = tf.Variable(1)
+    b = tf.Variable(2)
+    pool_va = tf.Variable([1,2,2,1], name="pool")
+    store_list = [a,b,pool_va]
+    def import_test(self):
+        sess = tf.Session()
+        saver=tf.train.Saver();
+        saver.restore(sess,save_path='./train_result')
+        print sess.run(self.pool_va)
+    '''
+    def import(self):
+        sess = tf.Session()
+        saver=tf.train.Saver();
+        saver.restore(sess,save_path='./train_result')
+        print sess.run(self.a)
+        '''
+if __name__ == "__main__":
+    test = TestImport()
+    test.import_test()

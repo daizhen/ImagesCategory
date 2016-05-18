@@ -36,6 +36,8 @@ def main(argv=None):  # pylint: disable=unused-argument
     train_data, train_tokens_list,train_labels = DataUtil.LoadCategoryData('../data/trainning_data.csv','../'+NAME_ID_MAPPING_NAME,'../data/100_100',imageInfo)
     validation_data, validation_tokens_list,validation_labels = DataUtil.LoadCategoryData('../data/validation_data.csv','../'+NAME_ID_MAPPING_NAME,'../data/100_100',imageInfo)
     test_data, test_tokens_list,test_labels = DataUtil.LoadCategoryData('../data/test_data.csv','../'+NAME_ID_MAPPING_NAME,'../data/100_100',imageInfo)
+    
+    
     print train_labels
     validation_size = validation_data.shape[0]
     test_size = test_data.shape[0]
