@@ -351,10 +351,12 @@ class TrainModel:
         with tf.Session() as s:
             self.RestoreParameters(s)
             text_data_vector = TextVectorUtil.BuildText2DimArray([token_list],self.tokenDict)
-            feed_dict = {check_data_node: image_data,
+            reshaped_image = np.reshape(image_data,(1,self.imageInfo['WIDTH'], self.imageInfo['HEIGHT'], self.imageInfo['CHANNELS']))
+            feed_dict = {check_data_node: reshaped_image,
                          text_node: text_data_vector}
             prediction_result = s.run(prediction,feed_dict = feed_dict)
             result_index = np.argmax(prediction_result, 1)[0]
-            print self.label_list[result_index]
+        print self.label_list[result_index]
+        return self.label_list[result_index]
         
         
