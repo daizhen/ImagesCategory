@@ -14,6 +14,7 @@ from util.freeze_graph import freeze_graph
 import util.DataUtil as DataUtil
 import util.TextVectorUtil as TextVectorUtil
 import util.ModelUtil as ModelUtil
+import numpy as np
 
 IMAGE_SIZE = 100
 NUM_CHANNELS = 1
@@ -35,6 +36,7 @@ class TrainModel:
     
     train_csv_file = ''
     name_id_mapping_file = ''
+    label_list = None
     image_dir = ''
     
     validation_csv_file = ''
@@ -79,7 +81,15 @@ class TrainModel:
     fc2_weights = None
     fc2_biases = None
     
+    def LoadTokenDict(self):
+        self.tokenDict = TextVectorUtil.GetAllTokenDict(self.text_tokens_csv)
+        self.tokenCount = len(self.tokenDict)
+    
     def InitVars(self):
+        self.LoadTokenDict()
+        self.label_list = DataUtil.LoadAllLabels(self.name_id_mapping_file)
+        self.labelCount = len(self.label_list)
+        
         # Set parameters
         self.conv1_weights = tf.Variable(
             tf.truncated_normal([5, 5, self.imageInfo['CHANNELS'], 32],  # 5x5 filter, depth 32.
@@ -253,7 +263,7 @@ class TrainModel:
         
         #vars to be saved
         store_list = [self.conv1_weights,self.conv1_biases,self.conv2_weights,self.conv2_biases,
-                        self.conv3_weights,self.conv3_biases,self.fc1_weights,self.fc2_biases,self.fc2_weights,self.fc2_biases]
+                        self.conv3_weights,self.conv3_biases,self.fc1_weights,self.fc1_biases,self.fc2_weights,self.fc2_biases]
 
         # Create saver
         saver=tf.train.Saver(store_list);
@@ -329,19 +339,22 @@ class TrainModel:
     def RestoreParameters(self,session):
         #vars to be saved
         store_list = [self.conv1_weights,self.conv1_biases,self.conv2_weights,self.conv2_biases,
-                        self.conv3_weights,self.conv3_biases,self.fc1_weights,self.fc2_biases,self.fc2_weights,self.fc2_biases]
+                        self.conv3_weights,self.conv3_biases,self.fc1_weights,self.fc1_biases,self.fc2_weights,self.fc2_biases]
         restorer = tf.train.Saver(store_list)
         restorer.restore(session,save_path=os.path.join(self.model_save_dir,self.model_save_file_name))      
-        pass           
+                
 
-    def Predict(image_data, token_list):
+    def Predict(self,image_data, token_list):
         check_data_node = tf.placeholder(tf.float32, shape=(1, self.imageInfo['WIDTH'], self.imageInfo['HEIGHT'], self.imageInfo['CHANNELS']))  
         text_node = tf.placeholder(tf.float32, shape=(1, self.tokenCount))
         prediction = tf.nn.softmax(self.CreateModel(check_data_node,text_node))
         with tf.Session() as s:
-            RestoreParameters(s)
-            feed_dict = {check_data_node: batch_data,
-                         text_node: batch_text_data_vector}
+            self.RestoreParameters(s)
+            text_data_vector = TextVectorUtil.BuildText2DimArray([token_list],self.tokenDict)
+            feed_dict = {check_data_node: image_data,
+                         text_node: text_data_vector}
             prediction_result = s.run(prediction,feed_dict = feed_dict)
+            result_index = np.argmax(prediction_result, 1)[0]
+            print self.label_list[result_index]
         
         
