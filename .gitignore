@@ -5,3 +5,4 @@ data/
 data/test_data.csv
 data/trainning_data.csv
 data/validation_data.csv
+trained_models/

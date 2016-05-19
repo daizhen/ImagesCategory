@@ -19,14 +19,14 @@ IMAGE_SIZE = 100
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
 
-BATCH_SIZE = 300
+BATCH_SIZE = 30
 NUM_EPOCHS = 20
+SEED = None
 
 class TrainModel:
     stddev_value = 0.1
     init_learn_rate = 0.01
     decay_rate = 0.95
-    SEED = None
     
     model_save_dir = ''
     model_save_file_name = 'train_result'
@@ -84,41 +84,41 @@ class TrainModel:
         self.conv1_weights = tf.Variable(
             tf.truncated_normal([5, 5, self.imageInfo['CHANNELS'], 32],  # 5x5 filter, depth 32.
                             stddev=self.stddev_value,
-                            seed=self.SEED), name='conv1_weights')
+                            seed=SEED), name='conv1_weights')
         self.conv1_biases = tf.Variable(tf.zeros([32]), name='conv1_biases')
         
         self.conv2_weights = tf.Variable(
             tf.truncated_normal([5, 5, 32, 32],
                                 stddev=self.stddev_value,
-                                seed=self.SEED), name='conv2_weights')
+                                seed=SEED), name='conv2_weights')
         self.conv2_biases = tf.Variable(tf.constant(0.1, shape=[32]), name='conv2_biases')
         
         self.conv3_weights = tf.Variable(
             tf.truncated_normal([5, 5, 32, 64],
                                 stddev=self.stddev_value,
-                                seed=self.SEED), name='conv3_weights') 
+                                seed=SEED), name='conv3_weights') 
         self.conv3_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv3_biases')
         
         self.fc1_weights = tf.Variable(  # fully connected, depth 1024.
             tf.truncated_normal([int(self.imageInfo['WIDTH'] / 8) * int(self.imageInfo['HEIGHT'] / 8) * 64 + self.tokenCount, 300],
                                 stddev=self.stddev_value,
-                                seed=self.SEED), name='fc1_weights')
+                                seed=SEED), name='fc1_weights')
         self.fc1_biases = tf.Variable(tf.constant(0.1, shape=[300]), name='fc1_biases')
         
         
         self.fc2_weights = tf.Variable(
             tf.truncated_normal([300, self.labelCount],
                                 stddev=self.stddev_value,
-                                seed=self.SEED), name='fc2_weights')
+                                seed=SEED), name='fc2_weights')
         self.fc2_biases = tf.Variable(tf.constant(self.stddev_value, shape=[self.labelCount]), name='fc2_biases')
 
     def LoadData(self):
         self.train_data,  self.train_tokens_list, self.train_labels = DataUtil.LoadCategoryData(self.train_csv_file,self.name_id_mapping_file,self.image_dir,self.imageInfo)
         self.validation_data, self.validation_tokens_list,self.validation_labels = DataUtil.LoadCategoryData(self.validation_csv_file,self.name_id_mapping_file,self.image_dir,self.imageInfo)
         self.test_data, self.test_tokens_list,self.test_labels = DataUtil.LoadCategoryData(self.test_csv_file,self.name_id_mapping_file,self.image_dir,self.imageInfo)
-        self.validation_size = validation_data.shape[0]
-        self.test_size = test_data.shape[0]
-        self.train_size = train_data.shape[0]
+        self.validation_size = self.validation_data.shape[0]
+        self.test_size = self.test_data.shape[0]
+        self.train_size = self.train_data.shape[0]
 
         self.tokenDict = TextVectorUtil.GetAllTokenDict(self.text_tokens_csv)
     
@@ -130,32 +130,32 @@ class TrainModel:
         self.conv1_weights = tf.Variable(
             tf.truncated_normal([5, 5, self.imageInfo['CHANNELS'], 32],  # 5x5 filter, depth 32.
                             stddev=self.stddev_value,
-                            seed=self.SEED), name='conv1_weights')
+                            seed=SEED), name='conv1_weights')
         self.conv1_biases = tf.Variable(tf.zeros([32]), name='conv1_biases')
         
         self.conv2_weights = tf.Variable(
             tf.truncated_normal([5, 5, 32, 32],
                                 stddev=self.stddev_value,
-                                seed=self.SEED), name='conv2_weights')
+                                seed=SEED), name='conv2_weights')
         self.conv2_biases = tf.Variable(tf.constant(0.1, shape=[32]), name='conv2_biases')
         
         self.conv3_weights = tf.Variable(
             tf.truncated_normal([5, 5, 32, 64],
                                 stddev=self.stddev_value,
-                                seed=self.SEED), name='conv3_weights') 
+                                seed=SEED), name='conv3_weights') 
         self.conv3_biases = tf.Variable(tf.constant(0.1, shape=[64]), name='conv3_biases')
         
         self.fc1_weights = tf.Variable(  # fully connected, depth 1024.
             tf.truncated_normal([int(self.imageInfo['WIDTH'] / 8) * int(self.imageInfo['HEIGHT'] / 8) * 64 + self.tokenCount, 300],
                                 stddev=self.stddev_value,
-                                seed=self.SEED), name='fc1_weights')
+                                seed=SEED), name='fc1_weights')
         self.fc1_biases = tf.Variable(tf.constant(0.1, shape=[300]), name='fc1_biases')
         
         
         self.fc2_weights = tf.Variable(
             tf.truncated_normal([300, self.labelCount],
                                 stddev=self.stddev_value,
-                                seed=self.SEED), name='fc2_weights')
+                                seed=SEED), name='fc2_weights')
         self.fc2_biases = tf.Variable(tf.constant(self.stddev_value, shape=[self.labelCount]), name='fc2_biases')
         
     def CreateModel(self,data,text_data, train=False):
@@ -285,7 +285,7 @@ class TrainModel:
             for step in xrange(int(NUM_EPOCHS * self.train_size / BATCH_SIZE)):
                 # Compute the offset of the current minibatch in the data.
                 # Note that we could use better randomization across epochs.
-                offset = (step * BATCH_SIZE) % (train_size - BATCH_SIZE)
+                offset = (step * BATCH_SIZE) % (self.train_size - BATCH_SIZE)
                 batch_data = self.train_data[offset:(offset + BATCH_SIZE), :, :, :]
                 batch_text_data = self.train_tokens_list[offset:(offset + BATCH_SIZE)]
                 batch_text_data_vector = TextVectorUtil.BuildText2DimArray(batch_text_data,self.tokenDict)
