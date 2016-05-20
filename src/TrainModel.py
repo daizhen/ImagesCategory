@@ -122,10 +122,11 @@ class TrainModel:
                                 seed=SEED), name='fc2_weights')
         self.fc2_biases = tf.Variable(tf.constant(self.stddev_value, shape=[self.labelCount]), name='fc2_biases')
 
-    def LoadData(self):
-        self.train_data,  self.train_tokens_list, self.train_labels = DataUtil.LoadCategoryData(self.train_csv_file,self.name_id_mapping_file,self.image_dir,self.imageInfo)
-        self.validation_data, self.validation_tokens_list,self.validation_labels = DataUtil.LoadCategoryData(self.validation_csv_file,self.name_id_mapping_file,self.image_dir,self.imageInfo)
-        self.test_data, self.test_tokens_list,self.test_labels = DataUtil.LoadCategoryData(self.test_csv_file,self.name_id_mapping_file,self.image_dir,self.imageInfo)
+    def LoadData(self,dataloader = DataUtil.LoadCategoryData):
+        self.train_data,  self.train_tokens_list, self.train_labels = dataloader(self.train_csv_file,self.name_id_mapping_file,self.image_dir,self.imageInfo)
+        self.validation_data, self.validation_tokens_list,self.validation_labels = dataloader(self.validation_csv_file,self.name_id_mapping_file,self.image_dir,self.imageInfo)
+        self.test_data, self.test_tokens_list,self.test_labels = dataloader(self.test_csv_file,self.name_id_mapping_file,self.image_dir,self.imageInfo)
+        
         self.validation_size = self.validation_data.shape[0]
         self.test_size = self.test_data.shape[0]
         self.train_size = self.train_data.shape[0]
