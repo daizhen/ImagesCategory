@@ -291,6 +291,12 @@ class TrainModel:
         with tf.Session() as s:
         
             tf.initialize_all_variables().run()
+            
+            ckpt = tf.train.get_checkpoint_state(self.model_save_dir)
+            if ckpt and ckpt.model_checkpoint_path:
+                print "find the checkpoing file"
+                saver.restore(s, ckpt.model_checkpoint_path)
+            
             print 'Initialized!'
             # Loop through training steps.
             for step in xrange(int(NUM_EPOCHS * self.train_size / BATCH_SIZE)):
