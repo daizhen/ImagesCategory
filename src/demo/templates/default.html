@@ -1,3 +1,117 @@
-hello....
-
-<image height="500" src="site_media/sd11412147digi a error feb2011.jpeg" width="600">333</image>
+<html>
+    <head>
+        <script type="text/javascript">
+            function getQueryString(name) 
+            { 
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); 
+                var r = window.location.search.substr(1).match(reg); 
+                if (r != null) 
+                    return unescape(r[2]); 
+                return null; 
+            } 
+            function Redirect(pageIndex)
+            {
+                 window.location.search = '?index='+pageIndex
+            }
+            function Next()
+            {
+                var currentIndex = getQueryString('index')
+                if(!currentIndex)
+                {
+                    currentIndex = 0
+                }
+                currentIndex = parseInt(currentIndex);
+                Redirect(currentIndex+1)
+            }
+            
+            
+            function Previous()
+            {
+                var currentIndex = getQueryString('index')
+                if(!currentIndex)
+                {
+                    currentIndex = 0
+                }
+                currentIndex = parseInt(currentIndex)
+                if(currentIndex ==0)
+                {
+                    Redirect(0)
+                }
+                else
+                {
+                    Redirect(currentIndex-1)   
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div>
+            <input type="button" value="<<Previous" onclick="Previous()"/>
+            <input type="text" value="{{ index }}">
+            <input type="button" value=">>Next" onclick="Next()"/>
+            
+        </div>
+        <div>
+            <image height="500" src="site_media/{{ filename }}" width="600"></image>
+        </div>
+        <div>
+            <table border="1">
+                <tr>
+                    <th>
+                        &nbsp;
+                    </th>
+                    <th>
+                        Actual Value
+                    </th>
+                    <th>
+                        Predict Value
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                       Category
+                    </td>
+                    <td>
+                        {{ actual_category }}
+                    </td>
+                    <td>
+                        {{ predict_category }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                       SubCategory
+                    </td>
+                    <td>
+                        {{ actual_subcategory }}
+                    </td>
+                    <td>
+                        {{ predict_subcategory }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                       Product Type
+                    </td>
+                    <td>
+                        {{ actual_producttype }}
+                    </td>
+                    <td>
+                        {{ predict_producttype  }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                       Product spec
+                    </td>
+                    <td>
+                        {{ actual_product }}
+                    </td>
+                    <td>
+                        {{ predict_product }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+     </body>
+</html>
