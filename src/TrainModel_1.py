@@ -24,7 +24,7 @@ BATCH_SIZE = 30
 NUM_EPOCHS = 20
 SEED = None
 
-class TrainModel:
+class TrainModel_1:
     stddev_value = 0.1
     init_learn_rate = 0.01
     decay_rate = 0.95
