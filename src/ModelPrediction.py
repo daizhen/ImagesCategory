@@ -32,9 +32,10 @@ class ModelPrediction:
         data = CSVUtil.ReadCSV(os.path.join(self.base_dir,'data/test_data.csv'))
         
         test_item = data[47]
+        '''
         self.image_path = os.path.join(self.base_dir,'data/jpg_images/'+test_item[0])
         self.token_list = TextVectorUtil.GetTokenList(test_item[5])
-        
+        '''
         cmd_str = 'python ModelPrediction.py category "'+self.image_path+'" '+ (' '.join(self.token_list))
      
         #return

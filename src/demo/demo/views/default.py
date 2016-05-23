@@ -10,5 +10,6 @@ def default(request):
     index =  request.GET.get('index')
     index = int(index)
     #return HttpResponse(index)
+    #return HttpResponse(type(testset))
     return render_to_response('default.html',{'index':index, 'filename':testset[index][0]})
     #return HttpResponse('<h1>main pange</h1>')

@@ -53,12 +53,16 @@ def PrepareDataSet():
     
     
     resultList = []
+    demo_data_list = []
     for imageName in imageTokensDict.keys():
         if imageName in imageCategoryDict and imageName in imageSubcategoryDict and imageName in imageProductTypeDict and imageName in imageProductDict and os.path.exists(os.path.join('../../data/100_100/',imageName)):
             resultList.append((imageName,imageCategoryDict[imageName],imageSubcategoryDict[imageName],imageProductTypeDict[imageName],imageProductDict[imageName],' '.join(imageTokensDict[imageName])))
         else:
             #print imageName
             pass
+        if imageName in imageCategoryDict and imageName in imageSubcategoryDict and imageName in imageProductTypeDict and imageName in imageProductDict and os.path.exists(os.path.join('../../data/gray_images/',imageName)):
+            demo_data_list.append((imageName,imageCategoryDict[imageName],imageSubcategoryDict[imageName],imageProductTypeDict[imageName],imageProductDict[imageName],' '.join(imageTokensDict[imageName])))
+
     print len(resultList)
     
     random.shuffle(resultList)
@@ -71,11 +75,12 @@ def PrepareDataSet():
     validation_data = resultList[train_size:train_size+validation_size]
     test_data = resultList[train_size+validation_size:train_size+validation_size + test_size]
     
-
+    '''
     CSVUtil.WriteCSV('../../data/trainning_data.csv',train_data)
     CSVUtil.WriteCSV('../../data/validation_data.csv',validation_data)
     CSVUtil.WriteCSV('../../data/test_data.csv',test_data)
-    
+    '''
+    CSVUtil.WriteCSV('../../data/demo_data.csv',demo_data_list)
 if __name__ == "__main__":
     PrepareDataSet()
     
