@@ -71,5 +71,5 @@ def Process_3():
     model.Release()
     CSVUtil.WriteCSV('demo_data.csv',result_list)        
 if __name__ == "__main__":
-    Process_2()
+    Process_3()
     
