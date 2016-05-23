@@ -104,6 +104,8 @@ class ModelPrediction:
             self.model_producttype.text_tokens_csv = os.path.join(self.base_dir,'data/all_trainning_tokens.csv')
             self.model_producttype.name_id_mapping_file = os.path.join(self.base_dir,'producttype_name_id_map.csv')
             self.model_producttype.InitVars()
+            self.session_producttype = tf.Session()
+            self.model_producttype.RestoreParameters(self.session_producttype)
         #image_file = os.path.join(base_dir,'data/jpg_images/sd21531814samm msg.jpeg')
         image = ImageUtil.PreprocessImage(self.image_path,(100,100))
         image_data = ImageUtil.ReadImageToArray(image)
@@ -112,7 +114,7 @@ class ModelPrediction:
             raw_text =OCRUtil.ExtractText(self.image_path)
             self.token_list = TextVectorUtil.GetTokenList(raw_text)
         #image_data = array
-        return self.model_producttype.Predict(image_data,self.token_list)
+        return self.model_producttype.Predict(image_data,self.token_list,self.session_producttype)
     
     def PredictProduct(self):
         if self.model_product == None:
@@ -121,7 +123,9 @@ class ModelPrediction:
             self.model_product.model_save_file_name='product_model'
             self.model_product.text_tokens_csv = os.path.join(self.base_dir,'data/all_trainning_tokens.csv')
             self.model_product.name_id_mapping_file = os.path.join(self.base_dir,'product_name_id_map.csv')
-            self.model_product.InitVars()
+            self.model_product.InitVars() 
+            self.session_product = tf.Session()
+            self.model_product.RestoreParameters(self.session_product)
         #image_file = os.path.join(base_dir,'data/jpg_images/sd21531814samm msg.jpeg')
         image = ImageUtil.PreprocessImage(self.image_path,(100,100))
         image_data = ImageUtil.ReadImageToArray(image)
@@ -130,7 +134,7 @@ class ModelPrediction:
             raw_text =OCRUtil.ExtractText(self.image_path)
             self.token_list = TextVectorUtil.GetTokenList(raw_text)
         #image_data = array
-        return self.model_product.Predict(image_data,self.token_list)
+        return self.model_product.Predict(image_data,self.token_list,self.session_product)
     def Release(self):
         if(self.session_category):
             self.session_category.close()
