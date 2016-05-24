@@ -1,0 +1,76 @@
+<html>
+    <head>
+       
+    </head>
+    <body>
+        <div>
+            <form action="/testpage/" enctype="multipart/form-data" method="post">
+                <input type="file" name = "imagefile"/>
+                <button value="submit" type="submit">upload</button>
+                {% csrf_token %}
+            </form>
+        </div>
+        <div>
+            <image height="500" src="site_media/{{ filename }}" width="600"></image>
+        </div>
+        <div>
+            <table border="1">
+                <tr>
+                    <th>
+                        &nbsp;
+                    </th>
+                    <th>
+                        Actual Value
+                    </th>
+                    <th>
+                        Predict Value
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                       Category
+                    </td>
+                    <td>
+                        {{ actual_category }}
+                    </td>
+                    <td>
+                        {{ predict_category }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                       SubCategory
+                    </td>
+                    <td>
+                        {{ actual_subcategory }}
+                    </td>
+                    <td>
+                        {{ predict_subcategory }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                       Product Type
+                    </td>
+                    <td>
+                        {{ actual_producttype }}
+                    </td>
+                    <td>
+                        {{ predict_producttype  }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                       Product spec
+                    </td>
+                    <td>
+                        {{ actual_product }}
+                    </td>
+                    <td>
+                        {{ predict_product }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+     </body>
+</html>

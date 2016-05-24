@@ -30,25 +30,35 @@ class ModelPrediction:
     def Predict(self):
     
         data = CSVUtil.ReadCSV(os.path.join(self.base_dir,'data/test_data.csv'))
-        
-        test_item = data[47]
         '''
+        test_item = data[47]
+        
         self.image_path = os.path.join(self.base_dir,'data/jpg_images/'+test_item[0])
         self.token_list = TextVectorUtil.GetTokenList(test_item[5])
         '''
-        cmd_str = 'python ModelPrediction.py category "'+self.image_path+'" '+ (' '.join(self.token_list))
-     
+        if self.token_list:
+            cmd_str = 'python ModelPrediction.py category "'+self.image_path+'" '+ (' '.join(self.token_list))
+        else:
+            cmd_str = 'python ModelPrediction.py category "'+self.image_path+'" '
         #return
         result = os.popen(cmd_str).readlines()
         predict_category = result[-1].strip()
-        cmd_str = 'python ModelPrediction.py subcategory "'+self.image_path+'" '+ (' '.join(self.token_list))
+        if self.token_list:
+            cmd_str = 'python ModelPrediction.py subcategory "'+self.image_path+'" '+ (' '.join(self.token_list))
+        else:
+            cmd_str = 'python ModelPrediction.py subcategory "'+self.image_path+'" '
         result = os.popen(cmd_str).readlines()
         predict_subcategory = result[-1].strip()
-        
-        cmd_str = 'python ModelPrediction.py producttype "'+self.image_path+'" '+ (' '.join(self.token_list))
+        if self.token_list:
+            cmd_str = 'python ModelPrediction.py producttype "'+self.image_path+'" '+ (' '.join(self.token_list))
+        else:
+            cmd_str = 'python ModelPrediction.py producttype "'+self.image_path+'" '
         result = os.popen(cmd_str).readlines()
         predict_producttype = result[-1].strip()
-        cmd_str = 'python ModelPrediction.py product "'+self.image_path+'" '+ (' '.join(self.token_list))
+        if self.token_list:
+            cmd_str = 'python ModelPrediction.py product "'+self.image_path+'" '+ (' '.join(self.token_list))
+        else:
+            cmd_str = 'python ModelPrediction.py product "'+self.image_path+'" '
         result = os.popen(cmd_str).readlines()
         predict_product = result[-1].strip()
         print predict_category,predict_subcategory,predict_producttype,predict_product
@@ -153,7 +163,8 @@ if __name__ == "__main__":
     
     model = ModelPrediction()
     model.image_path = sys.argv[2]
-    model.token_list = sys.argv[3:]
+    if len(sys.argv)>3:
+        model.token_list = sys.argv[3:]
     '''
     data = CSVUtil.ReadCSV(os.path.join(model.base_dir,'data/test_data.csv'))
     
