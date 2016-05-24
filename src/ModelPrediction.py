@@ -1,6 +1,7 @@
 import util.CSVUtil as CSVUtil
 import util.ImageUtil as ImageUtil
 import util.TextVectorUtil as TextVectorUtil
+import util.OCRUtil as OCRUtil
 import TrainModel
 
 import tensorflow as tf
@@ -26,6 +27,7 @@ class ModelPrediction:
     model_producttype =None
     model_product = None
     base_dir = '/home/daizhen/projects/ImagesCategory';
+    current_dir = '/home/daizhen/projects/ImagesCategory/src/';
     
     def Predict(self):
     
@@ -37,28 +39,28 @@ class ModelPrediction:
         self.token_list = TextVectorUtil.GetTokenList(test_item[5])
         '''
         if self.token_list:
-            cmd_str = 'python ModelPrediction.py category "'+self.image_path+'" '+ (' '.join(self.token_list))
+            cmd_str = 'python '+self.current_dir+'ModelPrediction.py category "'+self.image_path+'" '+ (' '.join(self.token_list))
         else:
-            cmd_str = 'python ModelPrediction.py category "'+self.image_path+'" '
+            cmd_str = 'python '+self.current_dir+'ModelPrediction.py category "'+self.image_path+'" '
         #return
         result = os.popen(cmd_str).readlines()
         predict_category = result[-1].strip()
         if self.token_list:
-            cmd_str = 'python ModelPrediction.py subcategory "'+self.image_path+'" '+ (' '.join(self.token_list))
+            cmd_str = 'python '+self.current_dir+'ModelPrediction.py subcategory "'+self.image_path+'" '+ (' '.join(self.token_list))
         else:
-            cmd_str = 'python ModelPrediction.py subcategory "'+self.image_path+'" '
+            cmd_str = 'python '+self.current_dir+'ModelPrediction.py subcategory "'+self.image_path+'" '
         result = os.popen(cmd_str).readlines()
         predict_subcategory = result[-1].strip()
         if self.token_list:
-            cmd_str = 'python ModelPrediction.py producttype "'+self.image_path+'" '+ (' '.join(self.token_list))
+            cmd_str = 'python '+self.current_dir+'ModelPrediction.py producttype "'+self.image_path+'" '+ (' '.join(self.token_list))
         else:
-            cmd_str = 'python ModelPrediction.py producttype "'+self.image_path+'" '
+            cmd_str = 'python '+self.current_dir+'ModelPrediction.py producttype "'+self.image_path+'" '
         result = os.popen(cmd_str).readlines()
         predict_producttype = result[-1].strip()
         if self.token_list:
-            cmd_str = 'python ModelPrediction.py product "'+self.image_path+'" '+ (' '.join(self.token_list))
+            cmd_str = 'python '+self.current_dir+'ModelPrediction.py product "'+self.image_path+'" '+ (' '.join(self.token_list))
         else:
-            cmd_str = 'python ModelPrediction.py product "'+self.image_path+'" '
+            cmd_str = 'python '+self.current_dir+'ModelPrediction.py product "'+self.image_path+'" '
         result = os.popen(cmd_str).readlines()
         predict_product = result[-1].strip()
         print predict_category,predict_subcategory,predict_producttype,predict_product
