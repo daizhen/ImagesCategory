@@ -14,8 +14,9 @@ def ConvertToGray(in_dir,out_dir):
             try:
                 im = Image.open(in_file).convert('L')
                 im.save(out_file);
-            except IOError:
-                print in_file
+            except IOError,e:
+				print in_file,e
+                #print in_file
 
 #ConvertToGray("../sample_data/original_images","../sample_data/gray_images")
 ConvertToGray("../../data/jpg_images","../../data/gray_images")
